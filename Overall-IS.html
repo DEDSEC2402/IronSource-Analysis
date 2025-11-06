@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronSource Report Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.js"></script>
+    <style>
+        /* (Your CSS styles are unchanged) */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #ddd;
+        }
+        .report-table th, .report-table td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 10px 8px;
+            border-left: 1px solid #eee;
+            border-right: 1px solid #eee;
+        }
+        .report-table th:first-child, .report-table td:first-child {
+            text-align: left;
+            padding-left: 12px;
+            font-weight: 600;
+        }
+        .report-table thead th {
+            background-color: #f8f9fa;
+            font-weight: 700;
+            border-top: 2px solid #333;
+            border-bottom: 2px solid #333;
+        }
+        .report-table tbody tr:last-child td {
+            border-bottom: 2px solid #333;
+        }
+        .report-table tbody tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+        .country-header th {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #000;
+        }
+        .int-metric-header {
+            color: #FFA500; /* Orange */
+        }
+        .rew-metric-header {
+            color: #3498DB; /* Blue */
+        }
+        .positive-change {
+            color: #008000; /* Green */
+            font-weight: 700;
+        }
+        .negative-change {
+            color: #FF0000; /* Red */
+            font-weight: 700;
+        }
+        .neutral-change {
+            color: #000000; /* Black */
+        }
+        .spacer-row td {
+            padding: 8px;
+            border: 0;
+            background-color: transparent !important;
+        }
+        .remove-row-btn {
+            font-size: 2rem;
+            line-height: 1;
+            font-weight: 300;
+            padding: 0 0.5rem;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.15s ease-in-out;
+        }
+        .remove-row-btn:hover {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <div class="container mx-auto max-w-7xl p-5 md:p-10">
+        
+        <div class="bg-white rounded-lg shadow-xl p-6 mb-8 border border-gray-200">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">IronSource Data Report</h1>
+            <p class="text-gray-600 mb-6">Upload your `Int.csv` and `Rew.csv` files to generate a styled report, just like the Python script's Excel output.</p>
+            
+            <div class="flex flex-wrap gap-4 items-center">
+                <div>
+                    <label for="intFile" class="block text-sm font-medium text-gray-700 mb-1">Int.csv File</label>
+                    <input type="file" id="intFile" accept=".csv" class="hidden"/>
+                    <label for="intFile"
+                            class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors">
+                        Choose file
+                    </label>
+                    <span id="intFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
+                </div>
+                
+                <div>
+                    <label for="rewFile" class="block text-sm font-medium text-gray-700 mb-1">Rew.csv File</label>
+                    <input type="file" id="rewFile" accept=".csv" class="hidden"/>
+                    <label for="rewFile"
+                            class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                        Choose file
+                    </label>
+                    <span id="rewFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
+                </div>
+                
+                <div class="self-end">
+                    <button id="generateBtn" class="py-2 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
+                        Generate Report
+                    </button>
+                </div>
+            </div>
+            
+            <div id="status" class="mt-4 text-sm font-medium text-gray-600"></div>
+        </div>
+
+        
+        <div id="controls-card" class="hidden bg-white rounded-lg shadow-xl p-6 mb-8 border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Report Controls</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4"> 
+                <div>
+                    <label for="gameSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Game</label>
+                    <select id="gameSelect" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                </div>
+                <div>
+                    <label for="countrySelect" class="block text-sm font-medium text-gray-700 mb-1">Base Country</label>
+                    <select id="countrySelect" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                </div>
+                <div>
+                    <label for="adFormatSelect" class="block text-sm font-medium text-gray-700 mb-1">Base Ad Format</label>
+                    <select id="adFormatSelect" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                </div>
+                <div>
+                    <label for="kpiSelect" class="block text-sm font-medium text-gray-700 mb-1">Base KPI</label>
+                    <select id="kpiSelect" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                </div>
+            </div>
+
+            <div class="mt-6 border-t border-gray-200 pt-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="compareToggle" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="compareToggle" class="ml-2 block text-sm font-medium text-gray-900">Compare Mode</label>
+                    </div>
+                    <button id="addComparisonBtn" class="hidden py-2 px-4 bg-green-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
+                        Add Comparison
+                    </button>
+                </div>
+            </div>
+
+            <div id="compare-controls-container" class="mt-4 space-y-4">
+                </div>
+
+        </div>
+
+        <div id="report-output" class="hidden space-y-8">
+            <div id="graph-container" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">KPI Line Graph</h2>
+                <canvas id="kpiChart"></canvas>
+            </div>
+        
+            <div id="table-container" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 min-h-[200px]">
+                </div>
+        </div>
+
+        <div id="report-placeholder" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 min-h-[200px]">
+            <p class="text-gray-500 italic">Your generated report tables will appear here...</p>
+        </div>
+        
+    </div>
+
+    <script>
+        // --- Element References ---
+        const intFileInput = document.getElementById('intFile');
+        const rewFileInput = document.getElementById('rewFile');
+        const generateBtn = document.getElementById('generateBtn');
+        const statusEl = document.getElementById('status');
+        
+        const controlsCard = document.getElementById('controls-card');
+        const reportOutput = document.getElementById('report-output');
+        const reportPlaceholder = document.getElementById('report-placeholder');
+        
+        // Main controls
+        const gameSelect = document.getElementById('gameSelect'); 
+        const countrySelect = document.getElementById('countrySelect');
+        const adFormatSelect = document.getElementById('adFormatSelect');
+        const kpiSelect = document.getElementById('kpiSelect');
+        
+        const tableContainer = document.getElementById('table-container');
+        const kpiChartCanvas = document.getElementById('kpiChart');
+
+        const intFileName = document.getElementById('intFileName');
+        const rewFileName = document.getElementById('rewFileName');
+
+        // --- Compare Controls References ---
+        const compareToggle = document.getElementById('compareToggle');
+        const addComparisonBtn = document.getElementById('addComparisonBtn'); 
+        const compareControlsContainer = document.getElementById('compare-controls-container'); 
+
+        // --- Global variables ---
+        let processedData = {};
+        let kpiChartInstance = null;
+        let comparisonRowCounter = 0; 
+        const lineColors = [ 
+            '#3498DB', // Blue (Base)
+            '#E74C3C', // Red
+            '#2ECC71', // Green
+            '#9B59B6', // Purple
+            '#F1C40F', // Yellow
+            '#1ABC9C', // Turquoise
+            '#E67E22', // Orange
+        ];
+
+        // --- Core Event Listeners ---
+        generateBtn.addEventListener('click', handleReportGeneration);
+        intFileInput.addEventListener('change', (e) => {
+            intFileName.textContent = e.target.files[0]?.name || 'No file chosen';
+        });
+        rewFileInput.addEventListener('change', (e) => {
+            rewFileName.textContent = e.target.files[0]?.name || 'No file chosen';
+        });
+
+        async function handleReportGeneration() {
+            statusEl.className = 'text-blue-600';
+            statusEl.textContent = 'Starting...';
+
+            if (!intFileInput.files[0] || !rewFileInput.files[0]) {
+                statusEl.className = 'text-red-600';
+                statusEl.textContent = 'Please select both Int.csv and Rew.csv files.';
+                return;
+            }
+
+            try {
+                // 1. Parse CSV
+                statusEl.textContent = 'Parsing CSV files...';
+                const [intResults, rewResults] = await Promise.all([
+                    parseCsv(intFileInput.files[0]),
+                    parseCsv(rewFileInput.files[0])
+                ]);
+
+                const intData = intResults.data.filter(r => r.Country && r['App Name']);
+                const rewData = rewResults.data.filter(r => r.Country && r['App Name']);
+
+                // 2. Process Data
+                statusEl.textContent = 'Processing data for all games...';
+                processedData = processAndStoreData(intData, rewData); 
+                
+                if (Object.keys(processedData).length === 0) {
+                    throw new Error("No valid data found (or no game-country pair passed the DAU > 200 filter).");
+                }
+
+                // 3. Setup UI
+                statusEl.textContent = 'Populating controls...';
+                populateGameDropdown();
+
+                // 4. Attach Event Listeners
+                
+                // Main controls
+                gameSelect.addEventListener('change', handleGameChange);
+                countrySelect.addEventListener('change', renderBaseGraph);
+                adFormatSelect.addEventListener('change', handleAdFormatChange); 
+                kpiSelect.addEventListener('change', renderBaseGraph);
+                
+                // Compare Listeners
+                compareToggle.addEventListener('change', handleCompareToggleChange);
+                addComparisonBtn.addEventListener('click', addComparisonRow); 
+
+                // Event Delegation for dynamic rows
+                compareControlsContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-row-btn')) {
+                        handleRemoveRow(e.target);
+                    }
+                    if (e.target.classList.contains('add-to-graph-btn')) {
+                        handleAddDataFromRow(e.target);
+                    }
+                });
+
+                compareControlsContainer.addEventListener('change', (e) => {
+                    if (e.target.classList.contains('compare-game-select')) {
+                        handleCompareGameChange(e.target);
+                    }
+                    if (e.target.classList.contains('compare-ad-format-select')) {
+                        handleCompareAdFormatChange(e.target);
+                    }
+                });
+
+
+                // 5. Initial Render
+                handleGameChange(); 
+                
+                // 6. Show UI
+                controlsCard.classList.remove('hidden');
+                reportOutput.classList.remove('hidden');
+                reportPlaceholder.classList.add('hidden');
+                
+                statusEl.className = 'text-green-600';
+                statusEl.textContent = 'Report generated successfully!';
+
+            } catch (error) {
+                statusEl.className = 'text-red-600';
+                statusEl.textContent = `Error: ${error.message}`;
+                console.error(error);
+                controlsCard.classList.add('hidden');
+                reportOutput.classList.add('hidden');
+                reportPlaceholder.classList.remove('hidden');
+            }
+        }
+        
+        // --- Main UI Management Functions ---
+
+        function populateGameDropdown() {
+            gameSelect.innerHTML = '';
+            const gameNames = Object.keys(processedData); 
+            if (gameNames.length === 0) {
+                 gameSelect.innerHTML = '<option>No games found</option>';
+                 return;
+            }
+            gameNames.forEach(game => {
+                const option = document.createElement('option');
+                option.value = game;
+                option.textContent = game;
+                gameSelect.appendChild(option);
+            });
+        }
+
+        function handleGameChange() {
+            if (kpiChartInstance) {
+                kpiChartInstance.destroy();
+                kpiChartInstance = null;
+            }
+            compareToggle.checked = false;
+            addComparisonBtn.classList.add('hidden');
+            compareControlsContainer.innerHTML = '';
+            comparisonRowCounter = 0;
+
+            populateDependentControls(); 
+            handleAdFormatChange(); 
+            renderAllTables(); 
+        }
+        
+        function populateDependentControls() {
+            const selectedGame = gameSelect.value;
+            const gameData = processedData[selectedGame];
+
+            if (!gameData) {
+                countrySelect.innerHTML = '<option>--</option>';
+                adFormatSelect.innerHTML = '<option>--</option>';
+                kpiSelect.innerHTML = '<option>--</option>';
+                return;
+            }
+
+            countrySelect.innerHTML = '';
+            gameData.countryList.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelect.appendChild(option);
+            });
+
+            adFormatSelect.innerHTML = '';
+            Object.keys(gameData.kpiLists).forEach(format => {
+                const option = document.createElement('option');
+                option.value = format;
+                option.textContent = format;
+                adFormatSelect.appendChild(option);
+            });
+        }
+
+        function populateKpiDropdown() {
+            const selectedGame = gameSelect.value;
+            const selectedFormat = adFormatSelect.value;
+            const kpis = processedData[selectedGame]?.kpiLists[selectedFormat] || [];
+            
+            kpiSelect.innerHTML = '';
+            kpis.forEach(kpi => {
+                const option = document.createElement('option');
+                option.value = kpi;
+                option.textContent = kpi;
+                kpiSelect.appendChild(option);
+            });
+        }
+
+         function handleAdFormatChange() {
+            populateKpiDropdown();
+            renderBaseGraph();
+        }
+
+        function renderAllTables() {
+            const selectedGame = gameSelect.value;
+            const gameData = processedData[selectedGame];
+            tableContainer.innerHTML = ''; 
+
+            if (!gameData || !gameData.countryList || gameData.countryList.length === 0) {
+                 tableContainer.innerHTML = '<p class="text-gray-500 italic">No table data found for this game.</p>';
+                 return;
+            }
+            for (const country of gameData.countryList) {
+                if (gameData.tablesHtml[country]) {
+                    tableContainer.innerHTML += gameData.tablesHtml[country];
+                }
+            }
+        }
+
+        // --- Compare and Graphing Logic ---
+
+        function handleCompareToggleChange() {
+            if (compareToggle.checked) {
+                addComparisonBtn.classList.remove('hidden');
+                addComparisonRow();
+            } else {
+                addComparisonBtn.classList.add('hidden');
+                compareControlsContainer.innerHTML = '';
+                comparisonRowCounter = 0;
+                clearAllCompareLines();
+            }
+        }
+
+        function addComparisonRow() {
+            comparisonRowCounter++;
+            const rowId = `compare-row-${comparisonRowCounter}`;
+            
+            const newRow = document.createElement('div');
+            newRow.id = rowId;
+            newRow.className = "compare-row-item p-4 bg-gray-50 rounded-lg border border-gray-200";
+            
+            newRow.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-semibold text-gray-700">Comparison ${comparisonRowCounter}</h3>
+                    <button class="remove-row-btn" data-row-id="${rowId}" title="Remove this comparison">&times;</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare Game</label>
+                        <select class="compare-game-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare Country</label>
+                        <select class="compare-country-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare Ad Format</label>
+                        <select class="compare-ad-format-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare KPI</label>
+                        <select class="compare-kpi-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
+                    </div>
+                    <button class="add-to-graph-btn col-span-2 md:col-span-1 py-2 px-6 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-all active:scale-95" data-row-id="${rowId}">Add to Graph</button>
+                    <input type="hidden" class="graph-dataset-label" value="">
+                </div>
+            `;
+            
+            compareControlsContainer.appendChild(newRow);
+            populateCompareGameDropdown(newRow.querySelector('.compare-game-select'));
+        }
+
+        function populateCompareGameDropdown(gameSelectElement) {
+            gameSelectElement.innerHTML = gameSelect.innerHTML; 
+            gameSelectElement.value = gameSelect.value; 
+            handleCompareGameChange(gameSelectElement);
+        }
+
+        function handleCompareGameChange(gameSelectElement) {
+            const row = gameSelectElement.closest('.compare-row-item');
+            const countrySelectEl = row.querySelector('.compare-country-select');
+            const adFormatSelectEl = row.querySelector('.compare-ad-format-select');
+            
+            const selectedGame = gameSelectElement.value;
+            const gameData = processedData[selectedGame];
+
+            if (!gameData) {
+                countrySelectEl.innerHTML = '<option>--</option>';
+                adFormatSelectEl.innerHTML = '<option>--</option>';
+                return;
+            }
+
+            countrySelectEl.innerHTML = '';
+            gameData.countryList.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelectEl.appendChild(option);
+            });
+            countrySelectEl.value = gameData.countryList.includes(countrySelect.value) ? countrySelect.value : gameData.countryList[0];
+            
+            adFormatSelectEl.innerHTML = '';
+            Object.keys(gameData.kpiLists).forEach(format => {
+                const option = document.createElement('option');
+                option.value = format;
+                option.textContent = format;
+                adFormatSelectEl.appendChild(option);
+            });
+            adFormatSelectEl.value = adFormatSelect.value;
+            
+            handleCompareAdFormatChange(adFormatSelectEl);
+        }
+
+        function handleCompareAdFormatChange(adFormatSelectElement) {
+            const row = adFormatSelectElement.closest('.compare-row-item');
+            const kpiSelectEl = row.querySelector('.compare-kpi-select');
+            const gameSelectEl = row.querySelector('.compare-game-select');
+
+            const selectedGame = gameSelectEl.value;
+            const selectedFormat = adFormatSelectElement.value; 
+            const kpis = processedData[selectedGame]?.kpiLists[selectedFormat] || [];
+            
+            kpiSelectEl.innerHTML = '';
+            kpis.forEach(kpi => {
+                const option = document.createElement('option');
+                option.value = kpi;
+                option.textContent = kpi;
+                kpiSelectEl.appendChild(option);
+            });
+            kpiSelectEl.value = kpis.includes(kpiSelect.value) ? kpiSelect.value : kpis[0];
+        }
+
+        function handleRemoveRow(buttonEl) {
+            const rowId = buttonEl.dataset.rowId;
+            const row = document.getElementById(rowId);
+            
+            const storedLabel = row.querySelector('.graph-dataset-label').value;
+            if (storedLabel) {
+                removeDatasetFromGraph(storedLabel, true); // true = update graph now
+            }
+            
+            row.remove();
+        }
+        
+        function clearAllCompareLines() {
+            if (!kpiChartInstance || kpiChartInstance.data.datasets.length <= 1) {
+                return;
+            }
+            kpiChartInstance.data.datasets = [kpiChartInstance.data.datasets[0]];
+            
+            if (kpiChartInstance.options.scales.y1) {
+                delete kpiChartInstance.options.scales.y1;
+            }
+
+            kpiChartInstance.update();
+        }
+
+        function renderBaseGraph() {
+            const selectedGame = gameSelect.value;
+            const selectedCountry = countrySelect.value;
+            const selectedKpi = kpiSelect.value;
+
+            if (!selectedGame || !selectedCountry || !selectedKpi || !processedData[selectedGame]) {
+                if (kpiChartInstance) {
+                    kpiChartInstance.destroy();
+                    kpiChartInstance = null;
+                }
+                return; 
+            }
+            const countryData = processedData[selectedGame].countries[selectedCountry];
+            if (!countryData) { return; }
+
+            const labels = countryData.dates;
+            const data = countryData.kpis[selectedKpi];
+            if (!data) return;
+
+            const datasetLabel = `${selectedGame} - ${selectedCountry} - ${selectedKpi} (Base)`;
+            const newBaseDataset = createDataset(datasetLabel, data, selectedKpi, 0, 'y'); // Base always on 'y'
+
+            if (!kpiChartInstance) {
+                createChart(labels, newBaseDataset);
+            } else {
+                // When base changes, clear all comparisons and remove the y1 axis
+                kpiChartInstance.data.datasets = [newBaseDataset]; 
+                kpiChartInstance.data.labels = labels;
+                
+                if (kpiChartInstance.options.scales.y1) {
+                    delete kpiChartInstance.options.scales.y1;
+                }
+                
+                kpiChartInstance.update();
+            }
+        }
+
+        /**
+         * THIS IS THE KEY MODIFIED FUNCTION
+         */
+        function handleAddDataFromRow(buttonEl) {
+            if (!kpiChartInstance) return; 
+
+            const row = buttonEl.closest('.compare-row-item');
+            const rowId = row.id;
+            const gameSelectEl = row.querySelector('.compare-game-select');
+            const countrySelectEl = row.querySelector('.compare-country-select');
+            const kpiSelectEl = row.querySelector('.compare-kpi-select');
+            const labelStorage = row.querySelector('.graph-dataset-label');
+            
+            const selectedGame = gameSelectEl.value;
+            const selectedCountry = countrySelectEl.value;
+            const selectedKpi = kpiSelectEl.value;
+            
+            const countryData = processedData[selectedGame].countries[selectedCountry];
+            if (!countryData) { 
+                statusEl.className = 'text-red-600';
+                statusEl.textContent = 'Error: No data for selected compare game/country.';
+                return; 
+            }
+
+            const data = countryData.kpis[selectedKpi];
+            if (!data) { 
+                statusEl.className = 'text-red-600';
+                statusEl.textContent = 'Error: No data for selected compare KPI.';
+                return; 
+            }
+
+            const datasetLabel = `${rowId} | ${selectedGame} - ${selectedCountry} - ${selectedKpi}`;
+
+            // --- NEW LOGIC: Check KPI names to decide axis ---
+            const baseKpi = kpiSelect.value;
+            const yAxisID = (selectedKpi === baseKpi) ? 'y' : 'y1';
+            // --- END NEW LOGIC ---
+
+            const oldLabel = labelStorage.value;
+            if (oldLabel) {
+                removeDatasetFromGraph(oldLabel, false); // false = don't update yet
+            }
+            
+            // --- NEW LOGIC: Only add y1 axis if we are using it ---
+            if (yAxisID === 'y1' && !kpiChartInstance.options.scales.y1) {
+                kpiChartInstance.options.scales.y1 = {
+                    type: 'linear',
+                    position: 'right',
+                    ticks: {
+                        color: '#E74C3C' // Red color for the new scale
+                    },
+                    grid: {
+                        drawOnChartArea: false 
+                    }
+                };
+            }
+            
+            const colorIndex = (kpiChartInstance.data.datasets.length % (lineColors.length - 1)) + 1; 
+            const newDataset = createDataset(datasetLabel, data, selectedKpi, colorIndex, yAxisID); // Pass determined axis ID
+
+            kpiChartInstance.data.datasets.push(newDataset);
+            kpiChartInstance.update(); // Now update
+            
+            labelStorage.value = datasetLabel;
+            
+            statusEl.className = 'text-green-600';
+            statusEl.textContent = 'Added to graph!';
+        }
+
+        /**
+         * MODIFIED: Removes a dataset and checks if y1 axis should be removed
+         */
+        function removeDatasetFromGraph(datasetLabel, update = true) {
+            if (!kpiChartInstance) return;
+
+            kpiChartInstance.data.datasets = kpiChartInstance.data.datasets.filter(d => d.label !== datasetLabel);
+            
+            // Count how many datasets are left on 'y1'
+            const y1Datasets = kpiChartInstance.data.datasets.filter(d => d.yAxisID === 'y1').length;
+            
+            if (y1Datasets === 0 && kpiChartInstance.options.scales.y1) {
+                // No datasets are using y1 anymore, so remove it
+                delete kpiChartInstance.options.scales.y1;
+            }
+
+            if (update) {
+                kpiChartInstance.update();
+            }
+        }
+
+        /**
+         * MODIFIED: Creates chart with explicit 'y' axis
+         */
+        function createChart(labels, baseDataset) {
+            if (kpiChartInstance) {
+                kpiChartInstance.destroy();
+            }
+            const ctx = kpiChartCanvas.getContext('2d');
+            kpiChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [baseDataset]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { // The primary Y-axis
+                            type: 'linear',
+                            position: 'left',
+                            ticks: { color: '#6b7280' }, // gray-500
+                        }
+                        // y1 will be added dynamically
+                    }
+                }
+            });
+        }
+
+        /**
+         * MODIFIED: Accepts a yAxisID
+         */
+        function createDataset(label, data, kpiName, colorIndex, yAxisID = 'y') { // Default to 'y'
+            let borderColor = lineColors[colorIndex % lineColors.length];
+            
+            if (colorIndex === 0) { 
+                if (kpiName.includes('(Int)')) {
+                    borderColor = '#FFA500'; // Orange
+                } else if (kpiName.includes('(Rew)')) {
+                    borderColor = '#3498DB'; // Blue
+                }
+            }
+            
+            return {
+                label: label,
+                data: data,
+                fill: false,
+                borderColor: borderColor,
+                tension: 0.1,
+                yAxisID: yAxisID // Assign the axis
+            };
+        }
+
+        // --- Data Processing Functions ---
+
+        function parseCsv(file) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    dynamicTyping: true, 
+                    complete: (results) => resolve(results),
+                    error: (err) => reject(err)
+                });
+            });
+        }
+
+        function processAndStoreData(intData, rewData) {
+            
+            const allGames = [...new Set([
+                ...intData.map(r => r['App Name']), 
+                ...rewData.map(r => r['App Name'])
+            ])].filter(Boolean);
+            
+            const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'United States'];
+
+            const metric_mapping_int = {
+                'Revenue': 'Revenue (Int)',
+                'Avg revenue / active users': 'ARPDAU (Int)',
+                'eCPM': 'ECPM (Int)',
+                'Impressions / sessions': 'Imps / Session (Int)',
+                'Impressions / active users': 'Imps / DAU (Int)',
+                'App fills rate': 'Fill Rate (Int)'
+            };
+            const metric_mapping_rew = {
+                'Revenue': 'Revenue (Rew)',
+                'Avg revenue / active users': 'ARPDAU (Rew)',
+                'eCPM': 'ECPM (Rew)',
+                'Impressions / sessions': 'Imps / Session (Rew)',
+                'Impressions / active users': 'Imps / DAU (Rew)',
+                'App fills rate': 'Fill Rate (Rew)'
+            };
+            
+            let output = {};
+
+            for (const game of allGames) {
+                let gameOutput = {
+                    countries: {}, 
+                    tablesHtml: {}, 
+                    countryList: [], 
+                    kpiLists: {
+                        "Overall": ['DAU', 'Revenue (Overall)', 'ARPDAU (Overall)'],
+                        "Int": Object.values(metric_mapping_int),
+                        "Rew": Object.values(metric_mapping_rew)
+                    }
+                };
+
+                for (const country of priority_countries) {
+                    
+                    const df_int_c = intData
+                        .filter(r => r.Country === country && r['App Name'] === game)
+                        .map(r => ({ ...r, Date: new Date(r.Date) }));
+                    
+                    const df_rew_c = rewData
+                        .filter(r => r.Country === country && r['App Name'] === game)
+                        .map(r => ({ ...r, Date: new Date(r.Date) }));
+
+                    if (df_int_c.length === 0 && df_rew_c.length === 0) {
+                        continue; 
+                    }
+
+                    const allDateTimes = new Set([
+                        ...df_int_c.map(r => r.Date.getTime()),
+                        ...df_rew_c.map(r => r.Date.getTime())
+                    ]);
+                    const dates_dt = Array.from(allDateTimes)
+                        .map(t => new Date(t))
+                        .sort((a, b) => a - b);
+                    
+                    const dau_source = df_int_c.length > 0 ? df_int_c : df_rew_c;
+                    const dau_series = createSeries(dau_source, dates_dt, 'Active users'); 
+                    
+                    if (dau_series.length === 0) continue; 
+
+                    const avg_dau = dau_series.reduce((a, b) => a + b, 0) / dau_series.length;
+
+                    if (avg_dau <= 200) {
+                        continue;
+                    }
+                    
+                    gameOutput.countryList.push(country); 
+
+                    const dates_str = dates_dt.map(d => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
+                    const dates_with_avg = [...dates_str, 'L7D Avg'];
+                    
+                    let kpiData = {};
+                    let int_metrics = {};
+                    let rew_metrics = {};
+
+                    for (const [orig_col, label] of Object.entries(metric_mapping_int)) {
+                        int_metrics[label] = createSeries(df_int_c, dates_dt, orig_col);
+                    }
+                    for (const [orig_col, label] of Object.entries(metric_mapping_rew)) {
+                        rew_metrics[label] = createSeries(df_rew_c, dates_dt, orig_col);
+                    }
+
+                    const revenue_overall = addSeries(int_metrics['Revenue (Int)'], rew_metrics['Revenue (Rew)']);
+                    const arpadu_overall = addSeries(int_metrics['ARPDAU (Int)'], rew_metrics['ARPDAU (Rew)']);
+                    
+                    kpiData['DAU'] = dau_series;
+                    kpiData['Revenue (Overall)'] = revenue_overall;
+                    kpiData['ARPDAU (Overall)'] = arpadu_overall;
+                    Object.assign(kpiData, int_metrics);
+                    Object.assign(kpiData, rew_metrics);
+                    
+                    gameOutput.countries[country] = {
+                        dates: dates_str,
+                        kpis: kpiData
+                    };
+
+                    // --- Generate HTML table ---
+                    let tableHtml = '<table class="report-table">';
+                    tableHtml += '<thead class="country-header">';
+                    tableHtml += `<tr><th>${country}</th>`;
+                    dates_with_avg.forEach(dateStr => {
+                        tableHtml += `<th>${dateStr}</th>`;
+                    });
+                    tableHtml += '</tr></thead>';
+                    tableHtml += '<tbody>';
+                    tableHtml += createRowHtml('DAU', dau_series);
+                    tableHtml += createRowHtml('Revenue (Overall)', revenue_overall);
+                    tableHtml += createRowHtml('ARPDAU (Overall)', arpadu_overall, '', ['ARPDAU (Overall)']);
+                    tableHtml += `<tr class="spacer-row"><td colspan="${dates_with_avg.length + 1}"></td></tr>`;
+                    for (const label of gameOutput.kpiLists.Int) {
+                        tableHtml += createRowHtml(label, int_metrics[label], 'int-metric-header', ['ARPDAU (Int)', 'ECPM (Int)', 'Imps / Session (Int)']);
+                    }
+                    tableHtml += `<tr class="spacer-row"><td colspan="${dates_with_avg.length + 1}"></td></tr>`;
+                    for (const label of gameOutput.kpiLists.Rew) {
+                        tableHtml += createRowHtml(label, rew_metrics[label], 'rew-metric-header', ['ARPDAU (Rew)', 'ECPM (Rew)', 'Imps / Session (Rew)']);
+                    }
+                    tableHtml += '</tbody></table>';
+                    
+                    gameOutput.tablesHtml[country] = tableHtml;
+
+                } // End country loop
+
+                if (gameOutput.countryList.length > 0) {
+                    output[game] = gameOutput;
+                }
+
+            } // End game loop
+
+            return output; 
+        }
+
+        // --- Helper Functions ---
+
+        function createSeries(data, dates_dt, metricCol) {
+            if (!data || data.length === 0) {
+                return new Array(dates_dt.length).fill(0);
+            }
+            const map = new Map(data.map(row => {
+                const value = typeof row[metricCol] === 'number' ? row[metricCol] : parseFloat(row[metricCol]);
+                return [row.Date.getTime(), isNaN(value) ? 0 : value];
+            }));
+            return dates_dt.map(date => map.get(date.getTime()) || 0);
+        }
+
+        function addSeries(seriesA, seriesB) {
+            return seriesA.map((val, index) => val + (seriesB[index] || 0));
+        }
+
+        function calculateL7DAvg(series) {
+            if (series.length <= 1) return 0;
+            const endIndex = series.length - 1; 
+            const startIndex = Math.max(0, endIndex - 7); 
+            const dataSlice = series.slice(startIndex, endIndex);
+            if (dataSlice.length === 0) return 0;
+            const sum = dataSlice.reduce((a, b) => a + b, 0);
+            return sum / dataSlice.length;
+        }
+
+        /**
+         * UPDATED with the fix for neutral (black) color
+         */
+        function createRowHtml(label, data, labelClass = '', metricsToColor = []) {
+            let rowHtml = `<tr><td class="${labelClass}">${label}</td>`;
+            const lastVal = data[data.length - 1] || 0;
+            const l7dAvg = calculateL7DAvg(data);
+            
+            // --- FIX: Round both values to 2 decimals for a stable comparison ---
+            const compLastVal = parseFloat(lastVal.toFixed(2));
+            const compL7dAvg = parseFloat(l7dAvg.toFixed(2));
+
+            let lastCellClass = 'neutral-change'; // Default is black
+            if (metricsToColor.includes(label)) {
+                
+                // --- FIX: Compare the rounded values ---
+                if (compLastVal > compL7dAvg) {
+                    lastCellClass = 'positive-change'; // Green
+                } else if (compLastVal < compL7dAvg) {
+                    lastCellClass = 'negative-change'; // Red
+                }
+                // If compLastVal === compL7dAvg, it stays 'neutral-change' (black)
+            }
+
+            data.forEach((val, index) => {
+                const numVal = Number(val);
+                const displayVal = (numVal % 1 !== 0 && numVal.toFixed(2) !== '0.00') ? numVal.toFixed(2) : Math.round(numVal);
+                
+                if (index === data.length - 1) {
+                    rowHtml += `<td class="${lastCellClass}">${displayVal}</td>`;
+                } else {
+                    rowHtml += `<td>${displayVal}</td>`;
+                }
+            });
+
+            const displayAvg = (l7dAvg % 1 !== 0 && l7dAvg.toFixed(2) !== '0.00') ? l7dAvg.toFixed(2) : Math.round(l7dAvg);
+            rowHtml += `<td>${displayAvg}</td>`;
+            rowHtml += '</tr>';
+            return rowHtml;
+        }
+
+    </script>
+</body>
+</html>
