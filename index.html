@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* (Your CSS styles are unchanged) */
         body {
@@ -119,6 +120,12 @@
                         Generate Report
                     </button>
                 </div>
+
+                <div class="self-end">
+                    <button id="downloadBtn" class="hidden py-2 px-6 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-all active:scale-95">
+                        Download Excel
+                    </button>
+                </div>
             </div>
             
             <div id="status" class="mt-4 text-sm font-medium text-gray-600"></div>
@@ -153,9 +160,11 @@
                         <input id="compareToggle" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <label for="compareToggle" class="ml-2 block text-sm font-medium text-gray-900">Compare Mode</label>
                     </div>
+                    
                     <button id="addComparisonBtn" class="hidden py-2 px-4 bg-green-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
                         Add Comparison
                     </button>
+                    
                 </div>
             </div>
 
@@ -203,23 +212,20 @@
         const intFileName = document.getElementById('intFileName');
         const rewFileName = document.getElementById('rewFileName');
 
-        // --- Compare Controls References ---
+        // Compare Controls References
         const compareToggle = document.getElementById('compareToggle');
         const addComparisonBtn = document.getElementById('addComparisonBtn'); 
         const compareControlsContainer = document.getElementById('compare-controls-container'); 
+
+        // Download Button Reference
+        const downloadBtn = document.getElementById('downloadBtn');
 
         // --- Global variables ---
         let processedData = {};
         let kpiChartInstance = null;
         let comparisonRowCounter = 0; 
         const lineColors = [ 
-            '#3498DB', // Blue (Base)
-            '#E74C3C', // Red
-            '#2ECC71', // Green
-            '#9B59B6', // Purple
-            '#F1C40F', // Yellow
-            '#1ABC9C', // Turquoise
-            '#E67E22', // Orange
+            '#3498DB', '#E74C3C', '#2ECC71', '#9B59B6', '#F1C40F', '#1ABC9C', '#E67E22',
         ];
 
         // --- Core Event Listeners ---
@@ -234,6 +240,7 @@
         async function handleReportGeneration() {
             statusEl.className = 'text-blue-600';
             statusEl.textContent = 'Starting...';
+            downloadBtn.classList.add('hidden'); 
 
             if (!intFileInput.files[0] || !rewFileInput.files[0]) {
                 statusEl.className = 'text-red-600';
@@ -265,18 +272,14 @@
                 populateGameDropdown();
 
                 // 4. Attach Event Listeners
-                
-                // Main controls
                 gameSelect.addEventListener('change', handleGameChange);
                 countrySelect.addEventListener('change', renderBaseGraph);
                 adFormatSelect.addEventListener('change', handleAdFormatChange); 
                 kpiSelect.addEventListener('change', renderBaseGraph);
-                
-                // Compare Listeners
                 compareToggle.addEventListener('change', handleCompareToggleChange);
                 addComparisonBtn.addEventListener('click', addComparisonRow); 
+                downloadBtn.addEventListener('click', handleDownloadExcel);
 
-                // Event Delegation for dynamic rows
                 compareControlsContainer.addEventListener('click', (e) => {
                     if (e.target.classList.contains('remove-row-btn')) {
                         handleRemoveRow(e.target);
@@ -285,7 +288,6 @@
                         handleAddDataFromRow(e.target);
                     }
                 });
-
                 compareControlsContainer.addEventListener('change', (e) => {
                     if (e.target.classList.contains('compare-game-select')) {
                         handleCompareGameChange(e.target);
@@ -295,7 +297,6 @@
                     }
                 });
 
-
                 // 5. Initial Render
                 handleGameChange(); 
                 
@@ -303,6 +304,7 @@
                 controlsCard.classList.remove('hidden');
                 reportOutput.classList.remove('hidden');
                 reportPlaceholder.classList.add('hidden');
+                downloadBtn.classList.remove('hidden'); 
                 
                 statusEl.className = 'text-green-600';
                 statusEl.textContent = 'Report generated successfully!';
@@ -314,6 +316,7 @@
                 controlsCard.classList.add('hidden');
                 reportOutput.classList.add('hidden');
                 reportPlaceholder.classList.remove('hidden');
+                downloadBtn.classList.add('hidden'); 
             }
         }
         
@@ -343,7 +346,6 @@
             addComparisonBtn.classList.add('hidden');
             compareControlsContainer.innerHTML = '';
             comparisonRowCounter = 0;
-
             populateDependentControls(); 
             handleAdFormatChange(); 
             renderAllTables(); 
@@ -352,14 +354,12 @@
         function populateDependentControls() {
             const selectedGame = gameSelect.value;
             const gameData = processedData[selectedGame];
-
             if (!gameData) {
                 countrySelect.innerHTML = '<option>--</option>';
                 adFormatSelect.innerHTML = '<option>--</option>';
                 kpiSelect.innerHTML = '<option>--</option>';
                 return;
             }
-
             countrySelect.innerHTML = '';
             gameData.countryList.forEach(country => {
                 const option = document.createElement('option');
@@ -367,7 +367,6 @@
                 option.textContent = country;
                 countrySelect.appendChild(option);
             });
-
             adFormatSelect.innerHTML = '';
             Object.keys(gameData.kpiLists).forEach(format => {
                 const option = document.createElement('option');
@@ -531,7 +530,7 @@
             
             const storedLabel = row.querySelector('.graph-dataset-label').value;
             if (storedLabel) {
-                removeDatasetFromGraph(storedLabel, true); // true = update graph now
+                removeDatasetFromGraph(storedLabel, true); 
             }
             
             row.remove();
@@ -570,12 +569,11 @@
             if (!data) return;
 
             const datasetLabel = `${selectedGame} - ${selectedCountry} - ${selectedKpi} (Base)`;
-            const newBaseDataset = createDataset(datasetLabel, data, selectedKpi, 0, 'y'); // Base always on 'y'
+            const newBaseDataset = createDataset(datasetLabel, data, selectedKpi, 0, 'y'); 
 
             if (!kpiChartInstance) {
                 createChart(labels, newBaseDataset);
             } else {
-                // When base changes, clear all comparisons and remove the y1 axis
                 kpiChartInstance.data.datasets = [newBaseDataset]; 
                 kpiChartInstance.data.labels = labels;
                 
@@ -587,9 +585,6 @@
             }
         }
 
-        /**
-         * THIS IS THE KEY MODIFIED FUNCTION
-         */
         function handleAddDataFromRow(buttonEl) {
             if (!kpiChartInstance) return; 
 
@@ -619,36 +614,28 @@
             }
 
             const datasetLabel = `${rowId} | ${selectedGame} - ${selectedCountry} - ${selectedKpi}`;
-
-            // --- NEW LOGIC: Check KPI names to decide axis ---
             const baseKpi = kpiSelect.value;
             const yAxisID = (selectedKpi === baseKpi) ? 'y' : 'y1';
-            // --- END NEW LOGIC ---
 
             const oldLabel = labelStorage.value;
             if (oldLabel) {
-                removeDatasetFromGraph(oldLabel, false); // false = don't update yet
+                removeDatasetFromGraph(oldLabel, false); 
             }
             
-            // --- NEW LOGIC: Only add y1 axis if we are using it ---
             if (yAxisID === 'y1' && !kpiChartInstance.options.scales.y1) {
                 kpiChartInstance.options.scales.y1 = {
                     type: 'linear',
                     position: 'right',
-                    ticks: {
-                        color: '#E74C3C' // Red color for the new scale
-                    },
-                    grid: {
-                        drawOnChartArea: false 
-                    }
+                    ticks: { color: '#E74C3C' },
+                    grid: { drawOnChartArea: false }
                 };
             }
             
             const colorIndex = (kpiChartInstance.data.datasets.length % (lineColors.length - 1)) + 1; 
-            const newDataset = createDataset(datasetLabel, data, selectedKpi, colorIndex, yAxisID); // Pass determined axis ID
+            const newDataset = createDataset(datasetLabel, data, selectedKpi, colorIndex, yAxisID);
 
             kpiChartInstance.data.datasets.push(newDataset);
-            kpiChartInstance.update(); // Now update
+            kpiChartInstance.update();
             
             labelStorage.value = datasetLabel;
             
@@ -656,19 +643,14 @@
             statusEl.textContent = 'Added to graph!';
         }
 
-        /**
-         * MODIFIED: Removes a dataset and checks if y1 axis should be removed
-         */
         function removeDatasetFromGraph(datasetLabel, update = true) {
             if (!kpiChartInstance) return;
 
             kpiChartInstance.data.datasets = kpiChartInstance.data.datasets.filter(d => d.label !== datasetLabel);
             
-            // Count how many datasets are left on 'y1'
             const y1Datasets = kpiChartInstance.data.datasets.filter(d => d.yAxisID === 'y1').length;
             
             if (y1Datasets === 0 && kpiChartInstance.options.scales.y1) {
-                // No datasets are using y1 anymore, so remove it
                 delete kpiChartInstance.options.scales.y1;
             }
 
@@ -677,9 +659,6 @@
             }
         }
 
-        /**
-         * MODIFIED: Creates chart with explicit 'y' axis
-         */
         function createChart(labels, baseDataset) {
             if (kpiChartInstance) {
                 kpiChartInstance.destroy();
@@ -695,28 +674,24 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     scales: {
-                        y: { // The primary Y-axis
+                        y: { 
                             type: 'linear',
                             position: 'left',
-                            ticks: { color: '#6b7280' }, // gray-500
+                            ticks: { color: '#6b7280' }, 
                         }
-                        // y1 will be added dynamically
                     }
                 }
             });
         }
 
-        /**
-         * MODIFIED: Accepts a yAxisID
-         */
-        function createDataset(label, data, kpiName, colorIndex, yAxisID = 'y') { // Default to 'y'
+        function createDataset(label, data, kpiName, colorIndex, yAxisID = 'y') {
             let borderColor = lineColors[colorIndex % lineColors.length];
             
             if (colorIndex === 0) { 
                 if (kpiName.includes('(Int)')) {
-                    borderColor = '#FFA500'; // Orange
+                    borderColor = '#FFA500';
                 } else if (kpiName.includes('(Rew)')) {
-                    borderColor = '#3498DB'; // Blue
+                    borderColor = '#3498DB';
                 }
             }
             
@@ -726,12 +701,12 @@
                 fill: false,
                 borderColor: borderColor,
                 tension: 0.1,
-                yAxisID: yAxisID // Assign the axis
+                yAxisID: yAxisID 
             };
         }
 
         // --- Data Processing Functions ---
-
+        
         function parseCsv(file) {
             return new Promise((resolve, reject) => {
                 Papa.parse(file, {
@@ -909,28 +884,21 @@
             return sum / dataSlice.length;
         }
 
-        /**
-         * UPDATED with the fix for neutral (black) color
-         */
         function createRowHtml(label, data, labelClass = '', metricsToColor = []) {
             let rowHtml = `<tr><td class="${labelClass}">${label}</td>`;
             const lastVal = data[data.length - 1] || 0;
             const l7dAvg = calculateL7DAvg(data);
             
-            // --- FIX: Round both values to 2 decimals for a stable comparison ---
             const compLastVal = parseFloat(lastVal.toFixed(2));
             const compL7dAvg = parseFloat(l7dAvg.toFixed(2));
 
-            let lastCellClass = 'neutral-change'; // Default is black
+            let lastCellClass = 'neutral-change'; 
             if (metricsToColor.includes(label)) {
-                
-                // --- FIX: Compare the rounded values ---
                 if (compLastVal > compL7dAvg) {
-                    lastCellClass = 'positive-change'; // Green
+                    lastCellClass = 'positive-change';
                 } else if (compLastVal < compL7dAvg) {
-                    lastCellClass = 'negative-change'; // Red
+                    lastCellClass = 'negative-change'; 
                 }
-                // If compLastVal === compL7dAvg, it stays 'neutral-change' (black)
             }
 
             data.forEach((val, index) => {
@@ -949,6 +917,255 @@
             rowHtml += '</tr>';
             return rowHtml;
         }
+// --- ***** NEW / FIXED Excel Download Functions ***** ---
+
+ // --- ***** NEW / FIXED Excel Download Functions ***** ---
+
+        /**
+         * Main function to build and download the Excel workbook
+         */
+        function handleDownloadExcel() {
+            try {
+                statusEl.className = 'text-blue-600';
+                statusEl.textContent = 'Generating Excel... This may take a moment.';
+
+                const wb = XLSX.utils.book_new(); 
+
+                // --- Define reusable styles ---
+                const thinBorder = { style: "thin", color: { rgb: "000000" } };
+                const thickBorder = { style: "thick", color: { rgb: "000000" } };
+                const centerAlign = { alignment: { horizontal: "center", vertical: "center" } };
+                const leftAlign = { alignment: { horizontal: "left", vertical: "center" } };
+                
+                // Style for the main Country header cell (e.g., "India")
+                const headerCountryStyle = { 
+                    font: { bold: true, sz: 14 }, // Larger font
+                    alignment: leftAlign,
+                    border: { top: thickBorder, left: thickBorder, bottom: thinBorder, right: thinBorder }
+                };
+                // Style for the date header cells (e.g., "24 Oct")
+                const headerDateStyle = { 
+                    font: { bold: true }, 
+                    alignment: centerAlign,
+                    border: { top: thickBorder, bottom: thinBorder, left: thinBorder, right: thinBorder }
+                };
+                // Style for the L7D Avg header cell
+                const headerL7DStyle = { 
+                    font: { bold: true }, 
+                    alignment: centerAlign,
+                    border: { top: thickBorder, bottom: thinBorder, right: thickBorder, left: thinBorder }
+                };
+
+
+                for (const gameName of Object.keys(processedData)) {
+                    const gameData = processedData[gameName];
+                    let ws = {}; // **Create an EMPTY worksheet object**
+                    let currentRow = 0; // Track the current row index
+                    let numCols = 0; // Will be set by the first header
+
+                    for (const country of gameData.countryList) {
+                        const countryData = gameData.countries[country];
+                        if (!countryData) continue;
+
+                        const dates = countryData.dates;
+                        const header1 = [country, ...dates, 'L7D Avg'];
+                        numCols = header1.length; // Set the number of columns
+                        
+                        let countryRows = []; // Store cell objects for *this* country block
+
+                        // --- 1. Create all rows for this country ---
+                        
+                        // --- Create Header Row ---
+                        const styledHeader1 = header1.map((h, i) => {
+                            let cell = { v: h, s: {} };
+                            if (i === 0) {
+                                cell.s = headerCountryStyle; // Country style
+                            } else if (i === numCols - 1) {
+                                cell.s = headerL7DStyle; // L7D Avg style
+                            } else {
+                                cell.s = headerDateStyle; // Date style
+                            }
+                            return cell;
+                        });
+                        countryRows.push(styledHeader1);
+
+                        // --- Create Data Rows ---
+                        const overallMetrics = gameData.kpiLists.Overall;
+                        const intMetrics = gameData.kpiLists.Int;
+                        const rewMetrics = gameData.kpiLists.Rew;
+                        const metricsToColor = [ 
+                            'ARPDAU (Overall)', 'ARPDAU (Int)', 'ECPM (Int)', 
+                            'Imps / Session (Int)', 'ARPDAU (Rew)', 'ECPM (Rew)', 'Imps / Session (Rew)'
+                        ];
+
+                        for (const metric of overallMetrics) {
+                            countryRows.push(createExcelRow(metric, countryData.kpis[metric], '', metricsToColor, numCols));
+                        }
+                        countryRows.push([]); // Spacer
+
+                        for (const metric of intMetrics) {
+                            countryRows.push(createExcelRow(metric, countryData.kpis[metric], 'int-metric-header', metricsToColor, numCols));
+                        }
+                        countryRows.push([]); // Spacer
+
+                        for (const metric of rewMetrics) {
+                            countryRows.push(createExcelRow(metric, countryData.kpis[metric], 'rew-metric-header', metricsToColor, numCols));
+                        }
+                        
+                        // --- 2. Apply borders and add all cells to worksheet ---
+                        countryRows.forEach((row, rIdx) => {
+                            const isSpacer = row.length === 0;
+                            if (isSpacer) {
+                                currentRow++;
+                                return;
+                            }
+                            
+                            const isLastDataRow = (rIdx === countryRows.length - 1);
+
+                            for (let cIdx = 0; cIdx < numCols; cIdx++) {
+                                const cell = row[cIdx] || { v: "" }; 
+                                
+                                cell.s = cell.s || {}; // Ensure style object exists
+                                cell.s.border = cell.s.border || {}; // Ensure border object exists
+                                
+                                const isFirstCol = cIdx === 0;
+                                const isLastCol = cIdx === numCols - 1;
+
+                                // Apply outer borders
+                                if (isLastDataRow) cell.s.border.bottom = thickBorder;
+                                if (isFirstCol) cell.s.border.left = thickBorder;
+                                if (isLastCol) cell.s.border.right = thickBorder;
+
+                                // Apply thin inner borders
+                                if (rIdx > 0 && !isLastDataRow) { // Not header, not last row
+                                    cell.s.border.bottom = thinBorder;
+                                }
+                                if (cIdx > 0 && !isLastCol) { // Not first col, not last col
+                                    cell.s.border.right = thinBorder;
+                                }
+                                
+                                // Add cell to worksheet at the correct address
+                                const address = XLSX.utils.encode_cell({ r: currentRow, c: cIdx });
+                                ws[address] = cell;
+                            }
+                            currentRow++;
+                        });
+                        
+                        currentRow++; // Add spacer *after* the block
+                    }
+
+                    // --- 3. Set worksheet column widths ---
+                    const fixedColWidths = [];
+                    if (numCols > 0) { // Check if numCols was set
+                        // First column
+                        fixedColWidths.push({ wch: 17.5 });
+                        // All other columns
+                        for(let i = 1; i < numCols; i++) {
+                            fixedColWidths.push({ wch: 11.58 });
+                        }
+                    }
+                    ws['!cols'] = fixedColWidths;
+
+                    // --- 4. Set worksheet range ---
+                    const range = { s: { r: 0, c: 0 }, e: { r: Math.max(0, currentRow - 2), c: Math.max(0, numCols - 1) } };
+                    ws['!ref'] = XLSX.utils.encode_range(range);
+
+                    const sheetName = gameName.replace(/[:\\/?*[\]]/g, '').substring(0, 31);
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                }
+
+                XLSX.writeFile(wb, "IronSource_Report_Formatted.xlsx");
+                
+                statusEl.className = 'text-green-600';
+                statusEl.textContent = 'Excel downloaded successfully!';
+
+            } catch (error) {
+                statusEl.className = 'text-red-600';
+                statusEl.textContent = `Error downloading Excel: ${error.message}`;
+                console.error(error);
+            }
+        }      
+/**
+ /**
+         * Helper function to create a formatted row for SheetJS
+         */
+        function createExcelRow(label, data, labelClass, metricsToColor, numCols) {
+            // --- Define Styles ---
+            const centerAlign = { alignment: { horizontal: "center", vertical: "center" } };
+            const greenText = { font: { color: { rgb: "008000" }, bold: true }, alignment: centerAlign };
+            const redText = { font: { color: { rgb: "FF0000" }, bold: true }, alignment: centerAlign };
+            const blackText = { font: { color: { rgb: "000000" } }, alignment: centerAlign }; // Normal black
+            
+            // Label styles
+            const intHeader = { font: { bold: true, color: { rgb: "FFA500" } }, alignment: { horizontal: "left", vertical: "center" } };
+            const rewHeader = { font: { bold: true, color: { rgb: "3498DB" } }, alignment: { horizontal: "left", vertical: "center" } };
+            const defaultLabel = { font: { bold: true }, alignment: { horizontal: "left", vertical: "center" } };
+            
+            let labelCell;
+            // 1. Label cell (Left-aligned)
+            if (labelClass === 'int-metric-header') {
+                labelCell = { v: label, s: intHeader };
+            } else if (labelClass === 'rew-metric-header') {
+                labelCell = { v: label, s: rewHeader };
+            } else {
+                labelCell = { v: label, s: defaultLabel };
+            }
+            const row = [labelCell]; 
+
+            // 2. Color logic
+            const lastVal = data[data.length - 1] || 0;
+            const l7dAvg = calculateL7DAvg(data);
+            const compLastVal = parseFloat(lastVal.toFixed(2));
+            const compL7dAvg = parseFloat(l7dAvg.toFixed(2));
+
+            let lastCellStyle = blackText; // Default black
+            if (metricsToColor.includes(label)) {
+                if (compLastVal > compL7dAvg) {
+                    lastCellStyle = greenText; 
+                } else if (compLastVal < compL7dAvg) {
+                    lastCellStyle = redText;
+                }
+            }
+
+            // 3. Data cells (Center-aligned)
+            data.forEach((val, index) => {
+                const cell = { v: val, t: 'n' }; 
+                
+                if (val % 1 !== 0) {
+                    cell.z = '0.00'; // 2-decimal number format
+                } else if (val > 1000) {
+                    cell.z = '#,##0'; // Comma separated for DAU
+                }
+                else {
+                    cell.z = '0'; // Integer format
+                }
+
+                if (index === data.length - 1) {
+                    cell.s = lastCellStyle; // Apply red/green/black style
+                } else {
+                    cell.s = centerAlign; // Standard center align
+                }
+                row.push(cell);
+            });
+
+            // 4. Avg cell (Center-aligned)
+            const avgCell = { v: l7dAvg, t: 'n', s: { alignment: centerAlign } };
+            if (l7dAvg % 1 !== 0) {
+                avgCell.z = '0.00';
+            } else if (l7dAvg > 1000) {
+                avgCell.z = '#,##0';
+            } else {
+                avgCell.z = '0';
+            }
+            row.push(avgCell);
+            
+            // 5. Pad row with empty cells
+            while (row.length < numCols) {
+                row.push(null); // Use null for empty cells
+            }
+
+            return row;
+        }      
 
     </script>
 </body>
