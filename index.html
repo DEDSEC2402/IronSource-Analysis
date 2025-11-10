@@ -88,50 +88,94 @@
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-    <div class="container mx-auto max-w-7xl p-5 md:p-10">
-        
-        <div class="bg-white rounded-lg shadow-xl p-6 mb-8 border border-gray-200">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">IronSource Data Report</h1>
-            <p class="text-gray-600 mb-6">Upload your `Int.csv` and `Rew.csv` files to generate a styled report, just like the Python script's Excel output.</p>
-            
-            <div class="flex flex-wrap gap-4 items-center">
-                <div>
-                    <label for="intFile" class="block text-sm font-medium text-gray-700 mb-1">Int.csv File</label>
-                    <input type="file" id="intFile" accept=".csv" class="hidden"/>
-                    <label for="intFile"
-                            class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors">
-                        Choose file
-                    </label>
-                    <span id="intFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
-                </div>
-                
-                <div>
-                    <label for="rewFile" class="block text-sm font-medium text-gray-700 mb-1">Rew.csv File</label>
-                    <input type="file" id="rewFile" accept=".csv" class="hidden"/>
-                    <label for="rewFile"
-                            class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
-                        Choose file
-                    </label>
-                    <span id="rewFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
-                </div>
-                
-                <div class="self-end">
-                    <button id="generateBtn" class="py-2 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
-                        Generate Report
-                    </button>
-                </div>
+    <div class="w-full text-center pt-6 pb-4">
+        <h1 class="text-2xl font-bold text-gray-700">IronSource Report</h1>
+    </div>
 
-                <div class="self-end">
-                    <button id="downloadBtn" class="hidden py-2 px-6 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-all active:scale-95">
-                        Download Excel
-                    </button>
+    <div class="px-5 md:px-10 pb-10">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+            <div class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">Performance Report</h1>
+                <p class="text-gray-600 mb-6">Upload your `Int.csv` and `Rew.csv` files to generate a styled report, just like the Python script's Excel output.</p>
+                
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div>
+                        <label for="intFile" class="block text-sm font-medium text-gray-700 mb-1">Int.csv File</label>
+                        <input type="file" id="intFile" accept=".csv" class="hidden"/>
+                        <label for="intFile"
+                                class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors">
+                            Choose file
+                        </label>
+                        <span id="intFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
+                    </div>
+                    
+                    <div>
+                        <label for="rewFile" class="block text-sm font-medium text-gray-700 mb-1">Rew.csv File</label>
+                        <input type="file" id="rewFile" accept=".csv" class="hidden"/>
+                        <label for="rewFile"
+                                class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                            Choose file
+                        </label>
+                        <span id="rewFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
+                    </div>
+                    
+                    <div class="self-end">
+                        <button id="generateBtn" class="py-2 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
+                            Generate Report
+                        </button>
+                    </div>
+
+                    <div class="self-end">
+                        <button id="downloadBtn" class="hidden py-2 px-6 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-all active:scale-95">
+                            Download Excel
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="status" class="mt-4 text-sm font-medium text-gray-600"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+                    
+                    <h2 class="text-2xl font-bold text-gray-800">Network Report</h2>
+                    
+                    <div class="flex flex-wrap gap-4 items-center">
+                        
+                        <input type="file" id="networkFile" accept=".csv" class="hidden"/>
+                        
+                        <label for="networkFile"
+                                class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors">
+                            Choose file
+                        </label>
+                        
+                        <span id="networkFileName" class="text-sm text-gray-500">No file chosen</span>
+
+                        <button id="generateNetworkReportBtn" class="py-2 px-6 bg-teal-600 text-white font-bold rounded-lg shadow-md hover:bg-teal-700 transition-all active:scale-95">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="network-report-wrapper" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    
+                    <div id="network-report-container" class="flex items-center justify-center text-center min-h-[150px]">
+                        
+                         <p id="network-placeholder-text" class="text-gray-500 italic">Your network report content will go here...</p>
+                        
+                        <div id="network-placeholder-loader" class="hidden">
+                            <svg class="animate-spin h-8 w-8 text-teal-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="text-teal-600 font-semibold mt-4">Generating Report...</p>
+                        </div>
+                    </div>
+            
                 </div>
             </div>
-            
-            <div id="status" class="mt-4 text-sm font-medium text-gray-600"></div>
-        </div>
-
-        
+            </div>
         <div id="controls-card" class="hidden bg-white rounded-lg shadow-xl p-6 mb-8 border border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Report Controls</h2>
             
@@ -174,7 +218,7 @@
         </div>
 
         <div id="report-output" class="hidden space-y-8">
-            <div id="graph-container" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
+            <div id="graph-container" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 relative max-h-[400px]">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">KPI Line Graph</h2>
                 <canvas id="kpiChart"></canvas>
             </div>
@@ -183,8 +227,18 @@
                 </div>
         </div>
 
-        <div id="report-placeholder" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 min-h-[200px]">
-            <p class="text-gray-500 italic">Your generated report tables will appear here...</p>
+        <div id="report-placeholder" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 min-h-[200px] flex items-center justify-center text-center">
+    
+            <p id="placeholder-text" class="text-gray-500 italic">Your generated report tables will appear here...</p>
+            
+            <div id="placeholder-loader" class="hidden">
+                <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-blue-600 font-semibold mt-4">Generating Report...</p>
+            </div>
+        
         </div>
         
     </div>
@@ -199,6 +253,10 @@
         const controlsCard = document.getElementById('controls-card');
         const reportOutput = document.getElementById('report-output');
         const reportPlaceholder = document.getElementById('report-placeholder');
+        
+        // --- ADDED THESE ---
+        const placeholderText = document.getElementById('placeholder-text');
+        const placeholderLoader = document.getElementById('placeholder-loader');
         
         // Main controls
         const gameSelect = document.getElementById('gameSelect'); 
@@ -220,6 +278,19 @@
         // Download Button Reference
         const downloadBtn = document.getElementById('downloadBtn');
 
+        // --- Network Report Element References ---
+        const networkFileInput = document.getElementById('networkFile');
+        const networkFileName = document.getElementById('networkFileName');
+        const generateNetworkReportBtn = document.getElementById('generateNetworkReportBtn');
+        const networkReportContainer = document.getElementById('network-report-container');
+        
+        // --- ADDED THESE ---
+        const networkPlaceholderText = document.getElementById('network-placeholder-text');
+        const networkPlaceholderLoader = document.getElementById('network-placeholder-loader');
+        
+        // --- REMOVED: networkReportControls, networkGameSelect, networkCountrySelect, networkAdFormatSelect ---
+
+
         // --- Global variables ---
         let processedData = {};
         let kpiChartInstance = null;
@@ -227,6 +298,22 @@
         const lineColors = [ 
             '#3498DB', '#E74C3C', '#2ECC71', '#9B59B6', '#F1C40F', '#1ABC9C', '#E67E22',
         ];
+        let networkDataStore = []; 
+
+        // --- GLOBAL CONSTANTS ---
+        const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'United States'];
+
+        const focus_networks = [
+            'UnityAds Bidding',
+            'Google Bidding',
+            'Meta Bidding',
+            'Mintegral Bidding',
+            'InMobi Bidding',
+            'ironSource Bidding',
+            'AppLovin',
+            'Google AdManager'
+        ];
+
 
         // --- Core Event Listeners ---
         generateBtn.addEventListener('click', handleReportGeneration);
@@ -237,7 +324,187 @@
             rewFileName.textContent = e.target.files[0]?.name || 'No file chosen';
         });
 
+        // --- Network Report Event Listeners ---
+        networkFileInput.addEventListener('change', (e) => {
+            networkFileName.textContent = e.target.files[0]?.name || 'No file chosen';
+        });
+
+        generateNetworkReportBtn.addEventListener('click', handleNetworkReportGeneration);
+
+        // --- Network Report Functions ---
+        
+        // --- ***** REPLACED FUNCTION ***** ---
+        // This function is now much simpler
+        async function handleNetworkReportGeneration() {
+            networkPlaceholderText.classList.add('hidden');
+            networkPlaceholderLoader.classList.remove('hidden');
+
+            try {
+                // 1. Parse CSV
+                const networkResults = await parseCsv(networkFileInput.files[0]);
+                
+                // 2. Process and store data
+                networkDataStore = networkResults.data
+                    .filter(r => r) // Filter out null rows
+                    .map(r => ({
+                        ...r,
+                        Date: r.Date ? new Date(r.Date) : null 
+                    }))
+                    .filter(r => 
+                        r['App Name'] && 
+                        r.Country && 
+                        r['Ad Format'] && 
+                        r['Network ID'] && 
+                        r.Date && 
+                        !isNaN(r.Date.getTime()) &&
+                        priority_countries.includes(r.Country) &&
+                        focus_networks.includes(r['Network ID']) &&
+                        r['Ad Format'] !== 'Banner' 
+                    );
+
+                if (networkDataStore.length === 0) {
+                    throw new Error("No valid data found for the specified countries, networks (excluding Banner), and date values.");
+                }
+
+                // 3. Render the report (no controls to populate)
+                // This will use the main controls' default values
+                renderNetworkReport();
+
+            } catch (error) {
+                networkReportContainer.innerHTML = `<p class="text-red-600">Error: ${error.message}</p>`;
+                networkPlaceholderLoader.classList.add('hidden'); // Hide loader on error
+                console.error(error);
+                networkDataStore = [];
+            }
+        }
+        
+        // --- ***** DELETED FUNCTION ***** ---
+        // "populateNetworkControls()" has been removed
+        
+
+        // --- ***** REPLACED FUNCTION ***** ---
+        // This function now reads from the main "Report Controls"
+        function renderNetworkReport() {
+            // --- Reset container ---
+            networkPlaceholderLoader.classList.add('hidden');
+            networkPlaceholderText.classList.add('hidden');
+            networkReportContainer.innerHTML = ''; // Clear the container
+            
+            // --- Read from MAIN "Report Controls" card ---
+            const selectedGame = gameSelect.value;
+            const selectedCountry = countrySelect.value;
+            const selectedMainAdFormat = adFormatSelect.value; // "Overall", "Int", or "Rew"
+
+            // --- Translate Ad Format ---
+            let networkAdFormatFilter = [];
+            if (selectedMainAdFormat === 'Int') {
+                networkAdFormatFilter.push('Interstitial');
+            } else if (selectedMainAdFormat === 'Rew') {
+                networkAdFormatFilter.push('Rewarded');
+            } else if (selectedMainAdFormat === 'Overall') {
+                networkAdFormatFilter.push('Interstitial', 'Rewarded');
+            }
+            // --- END NEW SECTION ---
+
+
+            // 1. Filter data based on new selections
+            const filteredData = networkDataStore.filter(r => 
+                r['App Name'] === selectedGame && 
+                r.Country === selectedCountry && 
+                networkAdFormatFilter.includes(r['Ad Format']) // Use the new filter
+            );
+
+            if (filteredData.length === 0) {
+                networkReportContainer.innerHTML = '<p class="text-gray-500 italic">No network data found for this selection.</p>';
+                return;
+            }
+
+            // 2. Find latest two dates
+            const allDates = [...new Set(filteredData.map(r => r.Date.getTime()))]
+                                .sort((a, b) => b - a); // Sort descending
+
+            if (allDates.length < 2) {
+                networkReportContainer.innerHTML = '<p class="text-gray-500 italic">Not enough date history to compare (need at least 2 days).</p>';
+                return;
+            }
+
+            const lastDate = new Date(allDates[0]);
+            const prevDate = new Date(allDates[1]);
+
+            // 3. Use the global focus_networks list
+            const networkIds = focus_networks;
+
+            let reportResults = [];
+
+            // 4. Calculate eCPM change for each network (in the correct order)
+            for (const networkId of networkIds) {
+                const lastRow = filteredData.find(r => r['Network ID'] === networkId && r.Date.getTime() === lastDate.getTime());
+                const prevRow = filteredData.find(r => r['Network ID'] === networkId && r.Date.getTime() === prevDate.getTime());
+
+                if (lastRow && prevRow) {
+                    const lastEcpm = parseFloat(lastRow.eCPM) || 0;
+                    const prevEcpm = parseFloat(prevRow.eCPM) || 0;
+
+                    if (prevEcpm === 0) continue; // Avoid division by zero
+
+                    const pctChange = (lastEcpm - prevEcpm) / prevEcpm;
+
+                    if (Math.abs(pctChange) >= 0.02) {
+                        reportResults.push({
+                            networkId: networkId,
+                            lastEcpm: lastEcpm,
+                            prevEcpm: prevEcpm,
+                            pctChange: pctChange
+                        });
+                    }
+                }
+            }
+
+            // 5. Generate and display HTML
+            if (reportResults.length === 0) {
+                networkReportContainer.innerHTML = `<p class="text-gray-700">No significant eCPM changes (>= 2%) found between ${prevDate.toLocaleDateString()} and ${lastDate.toLocaleDateString()}.</p>`;
+                return;
+            }
+            let html = '<table class="report-table">'; // This now starts the table directly
+            html += `<thead><tr>
+                        <th>Network ID</th>
+                        <th>eCPM (${prevDate.toLocaleDateString()})</th>
+                        <th>eCPM (${lastDate.toLocaleDateString()})</th>
+                        <th>% Change</th>
+                     </tr></thead><tbody>`;
+            
+            reportResults.forEach(row => {
+                html += createNetworkRowHtml(row);
+            });
+
+            html += '</tbody></table>';
+            
+            networkReportContainer.innerHTML = html; // Render the table
+        }
+
+
+        function createNetworkRowHtml(row) {
+            const changeClass = row.pctChange > 0 ? 'positive-change' : 'negative-change';
+            const changePercent = (row.pctChange * 100).toFixed(1);
+
+            return `
+                <tr>
+                    <td>${row.networkId}</td>
+                    <td>${row.prevEcpm.toFixed(2)}</td>
+                    <td>${row.lastEcpm.toFixed(2)}</td>
+                    <td class="${changeClass}">${changePercent}%</td>
+                </tr>
+            `;
+        }
+        // --- END OF NETWORK REPORT FUNCTIONS ---
+
+
         async function handleReportGeneration() {
+            // --- ADDED THESE 3 LINES ---
+            placeholderText.classList.add('hidden');
+            placeholderLoader.classList.remove('hidden');
+            reportPlaceholder.classList.remove('hidden'); // Ensure it's visible
+
             statusEl.className = 'text-blue-600';
             statusEl.textContent = 'Starting...';
             downloadBtn.classList.add('hidden'); 
@@ -272,10 +539,21 @@
                 populateGameDropdown();
 
                 // 4. Attach Event Listeners
-                gameSelect.addEventListener('change', handleGameChange);
-                countrySelect.addEventListener('change', renderBaseGraph);
-                adFormatSelect.addEventListener('change', handleAdFormatChange); 
-                kpiSelect.addEventListener('change', renderBaseGraph);
+                // --- ***** MODIFIED THIS SECTION ***** ---
+                gameSelect.addEventListener('change', handleGameChange); // handleGameChange already triggers network report
+                
+                countrySelect.addEventListener('change', () => {
+                    renderBaseGraph();
+                    if (networkDataStore.length > 0) renderNetworkReport(); // Add this
+                });
+                
+                adFormatSelect.addEventListener('change', () => {
+                    handleAdFormatChange();
+                    if (networkDataStore.length > 0) renderNetworkReport(); // Add this
+                });
+
+                kpiSelect.addEventListener('change', renderBaseGraph); // kpiSelect doesn't affect network report
+                
                 compareToggle.addEventListener('change', handleCompareToggleChange);
                 addComparisonBtn.addEventListener('click', addComparisonRow); 
                 downloadBtn.addEventListener('click', handleDownloadExcel);
@@ -296,6 +574,7 @@
                         handleCompareAdFormatChange(e.target);
                     }
                 });
+                // --- ***** END MODIFIED SECTION ***** ---
 
                 // 5. Initial Render
                 handleGameChange(); 
@@ -317,6 +596,10 @@
                 reportOutput.classList.add('hidden');
                 reportPlaceholder.classList.remove('hidden');
                 downloadBtn.classList.add('hidden'); 
+
+                // --- ADDED THESE 2 LINES ---
+                placeholderText.classList.remove('hidden'); // Show the original text
+                placeholderLoader.classList.add('hidden');  // Hide the loader
             }
         }
         
@@ -337,6 +620,7 @@
             });
         }
 
+        // --- ***** MODIFIED FUNCTION ***** ---
         function handleGameChange() {
             if (kpiChartInstance) {
                 kpiChartInstance.destroy();
@@ -349,6 +633,10 @@
             populateDependentControls(); 
             handleAdFormatChange(); 
             renderAllTables(); 
+            
+            // --- ADDED THIS LINE ---
+            // If network report is active, refresh it too.
+            if (networkDataStore.length > 0) renderNetworkReport();
         }
         
         function populateDependentControls() {
@@ -361,6 +649,7 @@
                 return;
             }
             countrySelect.innerHTML = '';
+            // --- USES GLOBAL priority_countries ---
             gameData.countryList.forEach(country => {
                 const option = document.createElement('option');
                 option.value = country;
@@ -672,7 +961,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false, // <-- THIS IS THE FIX
                     scales: {
                         y: { 
                             type: 'linear',
@@ -712,7 +1001,7 @@
                 Papa.parse(file, {
                     header: true,
                     skipEmptyLines: true,
-                    dynamicTyping: true, 
+                    // dynamicTyping: true, // <-- REMOVED
                     complete: (results) => resolve(results),
                     error: (err) => reject(err)
                 });
@@ -726,8 +1015,8 @@
                 ...rewData.map(r => r['App Name'])
             ])].filter(Boolean);
             
-            const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'United States'];
-
+            // --- USES GLOBAL CONSTANT ---
+            
             const metric_mapping_int = {
                 'Revenue': 'Revenue (Int)',
                 'Avg revenue / active users': 'ARPDAU (Int)',
@@ -758,7 +1047,8 @@
                         "Rew": Object.values(metric_mapping_rew)
                     }
                 };
-
+                
+                // --- USES GLOBAL CONSTANT ---
                 for (const country of priority_countries) {
                     
                     const df_int_c = intData
@@ -815,7 +1105,7 @@
                     kpiData['Revenue (Overall)'] = revenue_overall;
                     kpiData['ARPDAU (Overall)'] = arpadu_overall;
                     Object.assign(kpiData, int_metrics);
-                    Object.assign(kpiData, rew_metrics);
+Object.assign(kpiData, rew_metrics);
                     
                     gameOutput.countries[country] = {
                         dates: dates_str,
@@ -917,13 +1207,8 @@
             rowHtml += '</tr>';
             return rowHtml;
         }
-// --- ***** NEW / FIXED Excel Download Functions ***** ---
+// --- Excel Download Functions (Unchanged) ---
 
- // --- ***** NEW / FIXED Excel Download Functions ***** ---
-
-        /**
-         * Main function to build and download the Excel workbook
-         */
         function handleDownloadExcel() {
             try {
                 statusEl.className = 'text-blue-600';
@@ -1085,10 +1370,7 @@
                 console.error(error);
             }
         }      
-/**
- /**
-         * Helper function to create a formatted row for SheetJS
-         */
+
         function createExcelRow(label, data, labelClass, metricsToColor, numCols) {
             // --- Define Styles ---
             const centerAlign = { alignment: { horizontal: "center", vertical: "center" } };
