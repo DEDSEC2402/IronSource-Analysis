@@ -301,7 +301,7 @@
         let networkDataStore = []; 
 
         // --- GLOBAL CONSTANTS ---
-        const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'United States'];
+        const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'France', 'United States'];
 
         const focus_networks = [
             'UnityAds Bidding',
@@ -1078,7 +1078,7 @@
 
                     const avg_dau = dau_series.reduce((a, b) => a + b, 0) / dau_series.length;
 
-                    if (avg_dau <= 200) {
+                    if (avg_dau <= 100) {
                         continue;
                     }
                     
