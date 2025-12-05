@@ -40,7 +40,7 @@
 
             <div class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
                 <h1 class="text-3xl font-bold text-gray-800 mb-4">Performance Report</h1>
-                <p class="text-gray-600 mb-6">Upload your `Int.csv` and `Rew.csv` files to generate a styled report, just like the Python script's Excel output.</p>
+                <!-- <p class="text-gray-600 mb-6">Upload your `Int.csv` and `Rew.csv` files to generate a styled report, just like the Python script's Excel output.</p> -->
                 
                 <div class="flex flex-wrap gap-4 items-center">
                     <div>
@@ -180,7 +180,6 @@
         const placeholderText = document.getElementById('placeholder-text');
         const placeholderLoader = document.getElementById('placeholder-loader');
         
-        // --- Added new bucket references ---
         const bucketContainer = document.getElementById('bucket-container');
         const criticalList = document.getElementById('critical-list');
         const moderateList = document.getElementById('moderate-list');
@@ -359,7 +358,7 @@
             }
         }
         
-        // --- UPDATED BUCKET LOGIC ---
+        // --- 4-BUCKET LOGIC WITH ROUNDING ---
         function renderBuckets(data) {
             criticalList.innerHTML = '';
             moderateList.innerHTML = '';
@@ -380,9 +379,13 @@
                 const arpdauSeries = countryData.kpis['ARPDAU (Overall)'];
                 if (!arpdauSeries || arpdauSeries.length === 0) continue;
 
-                const lastVal = arpdauSeries[arpdauSeries.length - 1];
-                const l7dAvg = calculateL7DAvg(arpdauSeries);
-                if (l7dAvg === 0) continue; 
+                let rawLastVal = arpdauSeries[arpdauSeries.length - 1];
+                let rawL7dAvg = calculateL7DAvg(arpdauSeries);
+                if (rawL7dAvg === 0) continue; 
+
+                // FIX: Round to 2 decimals first (Visual Logic)
+                const lastVal = parseFloat(rawLastVal.toFixed(2));
+                const l7dAvg = parseFloat(rawL7dAvg.toFixed(2));
 
                 const pctChange = (lastVal - l7dAvg) / l7dAvg;
                 const itemHtml = `<li><strong>${country}</strong>: ${(pctChange * 100).toFixed(1)}%</li>`;
@@ -390,14 +393,16 @@
                 if (pctChange <= -0.05) {
                     criticalList.innerHTML += itemHtml;
                     hasCritical = true;
-                } else if (pctChange > -0.05 && pctChange <= -0.02) {
+                } else if (pctChange <= -0.02) {
+                    // Logic: Down between 2% and 5%
                     moderateList.innerHTML += itemHtml;
                     hasModerate = true;
-                } else if (pctChange > -0.02 && pctChange <= 0) {
+                } else if (pctChange <= 0) {
+                    // Logic: Down between 0% and 2%
                     safeList.innerHTML += itemHtml;
                     hasSafe = true;
                 } else {
-                    // Greater than 0
+                    // Logic: Greater than 0%
                     growingList.innerHTML += itemHtml;
                     hasGrowing = true;
                 }
@@ -426,7 +431,6 @@
             renderAllTables(); 
             if (networkDataStore.length > 0) renderNetworkReport();
             
-            // Trigger bucket update for the selected game
             renderBuckets(processedData);
         }
         
@@ -687,6 +691,7 @@
             return rowHtml;
         }
 
+        // --- EXCEL DOWNLOAD FUNCTIONS (RESTORED) ---
         function handleDownloadExcel() {
             try {
                 statusEl.className = 'text-blue-600';
