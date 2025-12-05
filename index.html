@@ -9,81 +9,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* (Your CSS styles are unchanged) */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 24px;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #ddd;
-        }
-        .report-table th, .report-table td {
-            text-align: center;
-            vertical-align: middle;
-            padding: 10px 8px;
-            border-left: 1px solid #eee;
-            border-right: 1px solid #eee;
-        }
-        .report-table th:first-child, .report-table td:first-child {
-            text-align: left;
-            padding-left: 12px;
-            font-weight: 600;
-        }
-        .report-table thead th {
-            background-color: #f8f9fa;
-            font-weight: 700;
-            border-top: 2px solid #333;
-            border-bottom: 2px solid #333;
-        }
-        .report-table tbody tr:last-child td {
-            border-bottom: 2px solid #333;
-        }
-        .report-table tbody tr:nth-child(even) {
-            background-color: #fdfdfd;
-        }
-        .country-header th {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #000;
-        }
-        .int-metric-header {
-            color: #FFA500; /* Orange */
-        }
-        .rew-metric-header {
-            color: #3498DB; /* Blue */
-        }
-        .positive-change {
-            color: #008000; /* Green */
-            font-weight: 700;
-        }
-        .negative-change {
-            color: #FF0000; /* Red */
-            font-weight: 700;
-        }
-        .neutral-change {
-            color: #000000; /* Black */
-        }
-        .spacer-row td {
-            padding: 8px;
-            border: 0;
-            background-color: transparent !important;
-        }
-        .remove-row-btn {
-            font-size: 2rem;
-            line-height: 1;
-            font-weight: 300;
-            padding: 0 0.5rem;
-            cursor: pointer;
-            color: #9ca3af;
-            transition: color 0.15s ease-in-out;
-        }
-        .remove-row-btn:hover {
-            color: #ef4444;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .report-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .report-table th, .report-table td { text-align: center; vertical-align: middle; padding: 10px 8px; border-left: 1px solid #eee; border-right: 1px solid #eee; }
+        .report-table th:first-child, .report-table td:first-child { text-align: left; padding-left: 12px; font-weight: 600; }
+        .report-table thead th { background-color: #f8f9fa; font-weight: 700; border-top: 2px solid #333; border-bottom: 2px solid #333; }
+        .report-table tbody tr:last-child td { border-bottom: 2px solid #333; }
+        .report-table tbody tr:nth-child(even) { background-color: #fdfdfd; }
+        .country-header th { font-size: 1.25rem; font-weight: 700; color: #000; }
+        .int-metric-header { color: #FFA500; }
+        .rew-metric-header { color: #3498DB; }
+        .positive-change { color: #008000; font-weight: 700; }
+        .negative-change { color: #FF0000; font-weight: 700; }
+        .neutral-change { color: #000000; }
+        .spacer-row td { padding: 8px; border: 0; background-color: transparent !important; }
+        .remove-row-btn { font-size: 2rem; line-height: 1; font-weight: 300; padding: 0 0.5rem; cursor: pointer; color: #9ca3af; transition: color 0.15s ease-in-out; }
+        .remove-row-btn:hover { color: #ef4444; }
+        #network-report-container h3 { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
@@ -104,66 +46,65 @@
                     <div>
                         <label for="intFile" class="block text-sm font-medium text-gray-700 mb-1">Int.csv File</label>
                         <input type="file" id="intFile" accept=".csv" class="hidden"/>
-                        <label for="intFile"
-                                class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors">
-                            Choose file
-                        </label>
+                        <label for="intFile" class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors">Choose file</label>
                         <span id="intFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
                     </div>
-                    
                     <div>
                         <label for="rewFile" class="block text-sm font-medium text-gray-700 mb-1">Rew.csv File</label>
                         <input type="file" id="rewFile" accept=".csv" class="hidden"/>
-                        <label for="rewFile"
-                                class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
-                            Choose file
-                        </label>
+                        <label for="rewFile" class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">Choose file</label>
                         <span id="rewFileName" class="ml-3 text-sm text-gray-500">No file chosen</span>
                     </div>
-                    
                     <div class="self-end">
-                        <button id="generateBtn" class="py-2 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
-                            Generate Report
-                        </button>
+                        <button id="generateBtn" class="py-2 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">Generate Report</button>
                     </div>
-
                     <div class="self-end">
-                        <button id="downloadBtn" class="hidden py-2 px-6 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-all active:scale-95">
-                            Download Excel
-                        </button>
+                        <button id="downloadBtn" class="hidden py-2 px-6 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-all active:scale-95">Download Excel</button>
                     </div>
                 </div>
                 
                 <div id="status" class="mt-4 text-sm font-medium text-gray-600"></div>
-            </div>
-            <div class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
-                    
-                    <h2 class="text-2xl font-bold text-gray-800">Network Report</h2>
-                    
-                    <div class="flex flex-wrap gap-4 items-center">
-                        
-                        <input type="file" id="networkFile" accept=".csv" class="hidden"/>
-                        
-                        <label for="networkFile"
-                                class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors">
-                            Choose file
-                        </label>
-                        
-                        <span id="networkFileName" class="text-sm text-gray-500">No file chosen</span>
 
-                        <button id="generateNetworkReportBtn" class="py-2 px-6 bg-teal-600 text-white font-bold rounded-lg shadow-md hover:bg-teal-700 transition-all active:scale-95">
-                            Generate
-                        </button>
+                <div id="bucket-container" class="hidden mt-6 grid grid-cols-1 gap-4">
+                    <h3 class="text-lg font-bold text-gray-700 mb-2 border-b pb-1">Performance Buckets (Overall ARPDAU)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-red-50 border border-red-200 rounded p-3">
+                            <h4 class="text-red-800 font-bold text-sm mb-2 flex items-center">🔴 Critical (Down &ge; 5%)</h4>
+                            <ul id="critical-list" class="text-xs text-red-700 space-y-1 list-disc pl-4"></ul>
+                            <p id="critical-empty" class="text-xs text-red-400 italic hidden">None</p>
+                        </div>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                            <h4 class="text-yellow-800 font-bold text-sm mb-2 flex items-center">🟡 Moderate (Down 2% - 5%)</h4>
+                            <ul id="moderate-list" class="text-xs text-yellow-700 space-y-1 list-disc pl-4"></ul>
+                            <p id="moderate-empty" class="text-xs text-yellow-400 italic hidden">None</p>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded p-3">
+                            <h4 class="text-green-800 font-bold text-sm mb-2 flex items-center">🟢 Safe (Down < 2% to 0%)</h4>
+                            <ul id="safe-list" class="text-xs text-green-700 space-y-1 list-disc pl-4"></ul>
+                            <p id="safe-empty" class="text-xs text-green-400 italic hidden">None</p>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                            <h4 class="text-blue-800 font-bold text-sm mb-2 flex items-center">🔵 Growing (Up > 0%)</h4>
+                            <ul id="growing-list" class="text-xs text-blue-700 space-y-1 list-disc pl-4"></ul>
+                            <p id="growing-empty" class="text-xs text-blue-400 italic hidden">None</p>
+                        </div>
                     </div>
                 </div>
-                
+            </div>
+
+            <div class="bg-white rounded-lg shadow-xl p-6 border border-gray-200">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Network Report</h2>
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <input type="file" id="networkFile" accept=".csv" class="hidden"/>
+                        <label for="networkFile" class="cursor-pointer inline-flex items-center text-sm font-semibold py-2 px-4 rounded-md border-0 bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors">Choose file</label>
+                        <span id="networkFileName" class="text-sm text-gray-500">No file chosen</span>
+                        <button id="generateNetworkReportBtn" class="py-2 px-6 bg-teal-600 text-white font-bold rounded-lg shadow-md hover:bg-teal-700 transition-all active:scale-95">Generate</button>
+                    </div>
+                </div>
                 <div id="network-report-wrapper" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    
                     <div id="network-report-container" class="flex items-center justify-center text-center min-h-[150px]">
-                        
-                         <p id="network-placeholder-text" class="text-gray-500 italic">Your network report content will go here...</p>
-                        
+                        <p id="network-placeholder-text" class="text-gray-500 italic">Your network report content will go here...</p>
                         <div id="network-placeholder-loader" class="hidden">
                             <svg class="animate-spin h-8 w-8 text-teal-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -172,13 +113,12 @@
                             <p class="text-teal-600 font-semibold mt-4">Generating Report...</p>
                         </div>
                     </div>
-            
                 </div>
             </div>
-            </div>
+        </div>
+
         <div id="controls-card" class="hidden bg-white rounded-lg shadow-xl p-6 mb-8 border border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Report Controls</h2>
-            
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4"> 
                 <div>
                     <label for="gameSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Game</label>
@@ -197,24 +137,16 @@
                     <select id="kpiSelect" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
                 </div>
             </div>
-
             <div class="mt-6 border-t border-gray-200 pt-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <input id="compareToggle" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <label for="compareToggle" class="ml-2 block text-sm font-medium text-gray-900">Compare Mode</label>
                     </div>
-                    
-                    <button id="addComparisonBtn" class="hidden py-2 px-4 bg-green-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">
-                        Add Comparison
-                    </button>
-                    
+                    <button id="addComparisonBtn" class="hidden py-2 px-4 bg-green-600 text-white text-sm font-bold rounded-lg shadow-md hover:bg-green-700 transition-all active:scale-95">Add Comparison</button>
                 </div>
             </div>
-
-            <div id="compare-controls-container" class="mt-4 space-y-4">
-                </div>
-
+            <div id="compare-controls-container" class="mt-4 space-y-4"></div>
         </div>
 
         <div id="report-output" class="hidden space-y-8">
@@ -222,15 +154,11 @@
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">KPI Line Graph</h2>
                 <canvas id="kpiChart"></canvas>
             </div>
-        
-            <div id="table-container" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 min-h-[200px]">
-                </div>
+            <div id="table-container" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200"></div>
         </div>
 
         <div id="report-placeholder" class="bg-white rounded-lg shadow-xl p-6 border border-gray-200 min-h-[200px] flex items-center justify-center text-center">
-    
-            <p id="placeholder-text" class="text-gray-500 italic">Your generated report tables will appear here...</p>
-            
+            <p id="placeholder-text" class="text-gray-500 italic"></p>
             <div id="placeholder-loader" class="hidden">
                 <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -238,191 +166,99 @@
                 </svg>
                 <p class="text-blue-600 font-semibold mt-4">Generating Report...</p>
             </div>
-        
         </div>
-        
     </div>
 
     <script>
-        // --- Element References ---
         const intFileInput = document.getElementById('intFile');
         const rewFileInput = document.getElementById('rewFile');
         const generateBtn = document.getElementById('generateBtn');
         const statusEl = document.getElementById('status');
-        
         const controlsCard = document.getElementById('controls-card');
         const reportOutput = document.getElementById('report-output');
         const reportPlaceholder = document.getElementById('report-placeholder');
-        
-        // --- ADDED THESE ---
         const placeholderText = document.getElementById('placeholder-text');
         const placeholderLoader = document.getElementById('placeholder-loader');
         
-        // Main controls
+        // --- Added new bucket references ---
+        const bucketContainer = document.getElementById('bucket-container');
+        const criticalList = document.getElementById('critical-list');
+        const moderateList = document.getElementById('moderate-list');
+        const safeList = document.getElementById('safe-list');
+        const growingList = document.getElementById('growing-list');
+
         const gameSelect = document.getElementById('gameSelect'); 
         const countrySelect = document.getElementById('countrySelect');
         const adFormatSelect = document.getElementById('adFormatSelect');
         const kpiSelect = document.getElementById('kpiSelect');
-        
         const tableContainer = document.getElementById('table-container');
         const kpiChartCanvas = document.getElementById('kpiChart');
-
         const intFileName = document.getElementById('intFileName');
         const rewFileName = document.getElementById('rewFileName');
-
-        // Compare Controls References
         const compareToggle = document.getElementById('compareToggle');
         const addComparisonBtn = document.getElementById('addComparisonBtn'); 
         const compareControlsContainer = document.getElementById('compare-controls-container'); 
-
-        // Download Button Reference
         const downloadBtn = document.getElementById('downloadBtn');
-
-        // --- Network Report Element References ---
         const networkFileInput = document.getElementById('networkFile');
         const networkFileName = document.getElementById('networkFileName');
         const generateNetworkReportBtn = document.getElementById('generateNetworkReportBtn');
         const networkReportContainer = document.getElementById('network-report-container');
-        
-        // --- ADDED THESE ---
         const networkPlaceholderText = document.getElementById('network-placeholder-text');
         const networkPlaceholderLoader = document.getElementById('network-placeholder-loader');
-        
-        // --- REMOVED: networkReportControls, networkGameSelect, networkCountrySelect, networkAdFormatSelect ---
 
-
-        // --- Global variables ---
         let processedData = {};
         let kpiChartInstance = null;
         let comparisonRowCounter = 0; 
-        const lineColors = [ 
-            '#3498DB', '#E74C3C', '#2ECC71', '#9B59B6', '#F1C40F', '#1ABC9C', '#E67E22',
-        ];
+        const lineColors = ['#3498DB', '#E74C3C', '#2ECC71', '#9B59B6', '#F1C40F', '#1ABC9C', '#E67E22'];
         let networkDataStore = []; 
 
-        // --- GLOBAL CONSTANTS ---
-        const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'France', 'United States'];
+        const priority_countries = ['India', 'Bangladesh', 'Pakistan', 'Indonesia', 'Philippines', 'Azerbaijão', 'Turkey', 'Mexico', 'Brazil', 'Portugal', 'United States'];
+        const focus_networks = ['UnityAds Bidding', 'Google AdMob', 'Meta Bidding', 'Mintegral Bidding', 'InMobi Bidding', 'ironSource Exchange', 'AppLovin Bidding', 'Google Ad Manager'];
 
-        const focus_networks = [
-            'UnityAds Bidding',
-            'Google Bidding',
-            'Meta Bidding',
-            'Mintegral Bidding',
-            'InMobi Bidding',
-            'ironSource Bidding',
-            'AppLovin',
-            'Google AdManager'
-        ];
-
-
-        // --- Core Event Listeners ---
         generateBtn.addEventListener('click', handleReportGeneration);
-        intFileInput.addEventListener('change', (e) => {
-            intFileName.textContent = e.target.files[0]?.name || 'No file chosen';
-        });
-        rewFileInput.addEventListener('change', (e) => {
-            rewFileName.textContent = e.target.files[0]?.name || 'No file chosen';
-        });
-
-        // --- Network Report Event Listeners ---
-        networkFileInput.addEventListener('change', (e) => {
-            networkFileName.textContent = e.target.files[0]?.name || 'No file chosen';
-        });
-
+        intFileInput.addEventListener('change', (e) => { intFileName.textContent = e.target.files[0]?.name || 'No file chosen'; });
+        rewFileInput.addEventListener('change', (e) => { rewFileName.textContent = e.target.files[0]?.name || 'No file chosen'; });
+        networkFileInput.addEventListener('change', (e) => { networkFileName.textContent = e.target.files[0]?.name || 'No file chosen'; });
         generateNetworkReportBtn.addEventListener('click', handleNetworkReportGeneration);
 
-        // --- Network Report Functions ---
-        
-        // --- ***** REPLACED FUNCTION ***** ---
-        // This function is now much simpler
         async function handleNetworkReportGeneration() {
             networkPlaceholderText.classList.add('hidden');
             networkPlaceholderLoader.classList.remove('hidden');
-
             try {
-                // 1. Parse CSV
                 const networkResults = await parseCsv(networkFileInput.files[0]);
-                
-                // 2. Process and store data
-                networkDataStore = networkResults.data
-                    .filter(r => r) // Filter out null rows
-                    .map(r => ({
-                        ...r,
-                        Date: r.Date ? new Date(r.Date) : null 
-                    }))
-                    .filter(r => 
-                        r['App Name'] && 
-                        r.Country && 
-                        r['Ad Format'] && 
-                        r['Network ID'] && 
-                        r.Date && 
-                        !isNaN(r.Date.getTime()) &&
-                        priority_countries.includes(r.Country) &&
-                        focus_networks.includes(r['Network ID']) &&
-                        r['Ad Format'] !== 'Banner' 
-                    );
-
-                if (networkDataStore.length === 0) {
-                    throw new Error("No valid data found for the specified countries, networks (excluding Banner), and date values.");
-                }
-
-                // 3. Render the report (no controls to populate)
-                // This will use the main controls' default values
+                networkDataStore = networkResults.data.filter(r => r).map(r => ({ ...r, Date: r.Date ? new Date(r.Date) : null })).filter(r => r['App Name'] && r.Country && r['Ad Format'] && r['Network ID'] && r.Date && !isNaN(r.Date.getTime()) && priority_countries.includes(r.Country) && focus_networks.includes(r['Network ID']) && r['Ad Format'] !== 'Banner');
+                if (networkDataStore.length === 0) throw new Error("No valid data found for the specified countries, networks (excluding Banner), and date values.");
                 renderNetworkReport();
-
             } catch (error) {
                 networkReportContainer.innerHTML = `<p class="text-red-600">Error: ${error.message}</p>`;
-                networkPlaceholderLoader.classList.add('hidden'); // Hide loader on error
+                networkPlaceholderLoader.classList.add('hidden');
                 console.error(error);
                 networkDataStore = [];
             }
         }
         
-        // --- ***** DELETED FUNCTION ***** ---
-        // "populateNetworkControls()" has been removed
-        
-
-        // --- ***** REPLACED FUNCTION ***** ---
-        // This function now reads from the main "Report Controls"
         function renderNetworkReport() {
-            // --- Reset container ---
             networkPlaceholderLoader.classList.add('hidden');
             networkPlaceholderText.classList.add('hidden');
-            networkReportContainer.innerHTML = ''; // Clear the container
+            networkReportContainer.innerHTML = ''; 
             
-            // --- Read from MAIN "Report Controls" card ---
             const selectedGame = gameSelect.value;
             const selectedCountry = countrySelect.value;
-            const selectedMainAdFormat = adFormatSelect.value; // "Overall", "Int", or "Rew"
+            const selectedMainAdFormat = adFormatSelect.value;
 
-            // --- Translate Ad Format ---
             let networkAdFormatFilter = [];
-            if (selectedMainAdFormat === 'Int') {
-                networkAdFormatFilter.push('Interstitial');
-            } else if (selectedMainAdFormat === 'Rew') {
-                networkAdFormatFilter.push('Rewarded');
-            } else if (selectedMainAdFormat === 'Overall') {
-                networkAdFormatFilter.push('Interstitial', 'Rewarded');
-            }
-            // --- END NEW SECTION ---
+            if (selectedMainAdFormat === 'Int') networkAdFormatFilter.push('Interstitial');
+            else if (selectedMainAdFormat === 'Rew') networkAdFormatFilter.push('Rewarded');
+            else if (selectedMainAdFormat === 'Overall') networkAdFormatFilter.push('Interstitial', 'Rewarded');
 
-
-            // 1. Filter data based on new selections
-            const filteredData = networkDataStore.filter(r => 
-                r['App Name'] === selectedGame && 
-                r.Country === selectedCountry && 
-                networkAdFormatFilter.includes(r['Ad Format']) // Use the new filter
-            );
+            const filteredData = networkDataStore.filter(r => r['App Name'] === selectedGame && r.Country === selectedCountry && networkAdFormatFilter.includes(r['Ad Format']));
 
             if (filteredData.length === 0) {
                 networkReportContainer.innerHTML = '<p class="text-gray-500 italic">No network data found for this selection.</p>';
                 return;
             }
 
-            // 2. Find latest two dates
-            const allDates = [...new Set(filteredData.map(r => r.Date.getTime()))]
-                                .sort((a, b) => b - a); // Sort descending
-
+            const allDates = [...new Set(filteredData.map(r => r.Date.getTime()))].sort((a, b) => b - a);
             if (allDates.length < 2) {
                 networkReportContainer.innerHTML = '<p class="text-gray-500 italic">Not enough date history to compare (need at least 2 days).</p>';
                 return;
@@ -430,81 +266,46 @@
 
             const lastDate = new Date(allDates[0]);
             const prevDate = new Date(allDates[1]);
-
-            // 3. Use the global focus_networks list
             const networkIds = focus_networks;
-
             let reportResults = [];
 
-            // 4. Calculate eCPM change for each network (in the correct order)
             for (const networkId of networkIds) {
                 const lastRow = filteredData.find(r => r['Network ID'] === networkId && r.Date.getTime() === lastDate.getTime());
                 const prevRow = filteredData.find(r => r['Network ID'] === networkId && r.Date.getTime() === prevDate.getTime());
-
                 if (lastRow && prevRow) {
                     const lastEcpm = parseFloat(lastRow.eCPM) || 0;
                     const prevEcpm = parseFloat(prevRow.eCPM) || 0;
-
-                    if (prevEcpm === 0) continue; // Avoid division by zero
-
+                    if (prevEcpm === 0) continue;
                     const pctChange = (lastEcpm - prevEcpm) / prevEcpm;
-
                     if (Math.abs(pctChange) >= 0.02) {
-                        reportResults.push({
-                            networkId: networkId,
-                            lastEcpm: lastEcpm,
-                            prevEcpm: prevEcpm,
-                            pctChange: pctChange
-                        });
+                        reportResults.push({ networkId: networkId, lastEcpm: lastEcpm, prevEcpm: prevEcpm, pctChange: pctChange });
                     }
                 }
             }
 
-            // 5. Generate and display HTML
             if (reportResults.length === 0) {
                 networkReportContainer.innerHTML = `<p class="text-gray-700">No significant eCPM changes (>= 2%) found between ${prevDate.toLocaleDateString()} and ${lastDate.toLocaleDateString()}.</p>`;
                 return;
             }
-            let html = '<table class="report-table">'; // This now starts the table directly
-            html += `<thead><tr>
-                        <th>Network ID</th>
-                        <th>eCPM (${prevDate.toLocaleDateString()})</th>
-                        <th>eCPM (${lastDate.toLocaleDateString()})</th>
-                        <th>% Change</th>
-                     </tr></thead><tbody>`;
-            
-            reportResults.forEach(row => {
-                html += createNetworkRowHtml(row);
-            });
 
+            let html = '<table class="report-table">';
+            html += `<thead><tr><th>Network ID</th><th>eCPM (${prevDate.toLocaleDateString()})</th><th>eCPM (${lastDate.toLocaleDateString()})</th><th>% Change</th></tr></thead><tbody>`;
+            reportResults.forEach(row => { html += createNetworkRowHtml(row); });
             html += '</tbody></table>';
-            
-            networkReportContainer.innerHTML = html; // Render the table
+            networkReportContainer.innerHTML = html;
         }
-
 
         function createNetworkRowHtml(row) {
             const changeClass = row.pctChange > 0 ? 'positive-change' : 'negative-change';
             const changePercent = (row.pctChange * 100).toFixed(1);
-
-            return `
-                <tr>
-                    <td>${row.networkId}</td>
-                    <td>${row.prevEcpm.toFixed(2)}</td>
-                    <td>${row.lastEcpm.toFixed(2)}</td>
-                    <td class="${changeClass}">${changePercent}%</td>
-                </tr>
-            `;
+            return `<tr><td>${row.networkId}</td><td>${row.prevEcpm.toFixed(2)}</td><td>${row.lastEcpm.toFixed(2)}</td><td class="${changeClass}">${changePercent}%</td></tr>`;
         }
-        // --- END OF NETWORK REPORT FUNCTIONS ---
-
 
         async function handleReportGeneration() {
-            // --- ADDED THESE 3 LINES ---
             placeholderText.classList.add('hidden');
             placeholderLoader.classList.remove('hidden');
-            reportPlaceholder.classList.remove('hidden'); // Ensure it's visible
-
+            reportPlaceholder.classList.remove('hidden'); 
+            bucketContainer.classList.add('hidden'); 
             statusEl.className = 'text-blue-600';
             statusEl.textContent = 'Starting...';
             downloadBtn.classList.add('hidden'); 
@@ -516,78 +317,34 @@
             }
 
             try {
-                // 1. Parse CSV
-                statusEl.textContent = 'Parsing CSV files...';
-                const [intResults, rewResults] = await Promise.all([
-                    parseCsv(intFileInput.files[0]),
-                    parseCsv(rewFileInput.files[0])
-                ]);
-
+                const [intResults, rewResults] = await Promise.all([parseCsv(intFileInput.files[0]), parseCsv(rewFileInput.files[0])]);
                 const intData = intResults.data.filter(r => r.Country && r['App Name']);
                 const rewData = rewResults.data.filter(r => r.Country && r['App Name']);
-
-                // 2. Process Data
                 statusEl.textContent = 'Processing data for all games...';
                 processedData = processAndStoreData(intData, rewData); 
-                
-                if (Object.keys(processedData).length === 0) {
-                    throw new Error("No valid data found (or no game-country pair passed the DAU > 200 filter).");
-                }
+                if (Object.keys(processedData).length === 0) throw new Error("No valid data found (or no game-country pair passed the DAU > 200 filter).");
 
-                // 3. Setup UI
+                bucketContainer.classList.remove('hidden');
                 statusEl.textContent = 'Populating controls...';
                 populateGameDropdown();
 
-                // 4. Attach Event Listeners
-                // --- ***** MODIFIED THIS SECTION ***** ---
-                gameSelect.addEventListener('change', handleGameChange); // handleGameChange already triggers network report
-                
-                countrySelect.addEventListener('change', () => {
-                    renderBaseGraph();
-                    if (networkDataStore.length > 0) renderNetworkReport(); // Add this
-                });
-                
-                adFormatSelect.addEventListener('change', () => {
-                    handleAdFormatChange();
-                    if (networkDataStore.length > 0) renderNetworkReport(); // Add this
-                });
-
-                kpiSelect.addEventListener('change', renderBaseGraph); // kpiSelect doesn't affect network report
-                
+                gameSelect.addEventListener('change', handleGameChange); 
+                countrySelect.addEventListener('change', () => { renderBaseGraph(); if (networkDataStore.length > 0) renderNetworkReport(); });
+                adFormatSelect.addEventListener('change', () => { handleAdFormatChange(); if (networkDataStore.length > 0) renderNetworkReport(); });
+                kpiSelect.addEventListener('change', renderBaseGraph); 
                 compareToggle.addEventListener('change', handleCompareToggleChange);
                 addComparisonBtn.addEventListener('click', addComparisonRow); 
                 downloadBtn.addEventListener('click', handleDownloadExcel);
+                compareControlsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('remove-row-btn')) handleRemoveRow(e.target); if (e.target.classList.contains('add-to-graph-btn')) handleAddDataFromRow(e.target); });
+                compareControlsContainer.addEventListener('change', (e) => { if (e.target.classList.contains('compare-game-select')) handleCompareGameChange(e.target); if (e.target.classList.contains('compare-ad-format-select')) handleCompareAdFormatChange(e.target); });
 
-                compareControlsContainer.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('remove-row-btn')) {
-                        handleRemoveRow(e.target);
-                    }
-                    if (e.target.classList.contains('add-to-graph-btn')) {
-                        handleAddDataFromRow(e.target);
-                    }
-                });
-                compareControlsContainer.addEventListener('change', (e) => {
-                    if (e.target.classList.contains('compare-game-select')) {
-                        handleCompareGameChange(e.target);
-                    }
-                    if (e.target.classList.contains('compare-ad-format-select')) {
-                        handleCompareAdFormatChange(e.target);
-                    }
-                });
-                // --- ***** END MODIFIED SECTION ***** ---
-
-                // 5. Initial Render
                 handleGameChange(); 
-                
-                // 6. Show UI
                 controlsCard.classList.remove('hidden');
                 reportOutput.classList.remove('hidden');
                 reportPlaceholder.classList.add('hidden');
                 downloadBtn.classList.remove('hidden'); 
-                
                 statusEl.className = 'text-green-600';
                 statusEl.textContent = 'Report generated successfully!';
-
             } catch (error) {
                 statusEl.className = 'text-red-600';
                 statusEl.textContent = `Error: ${error.message}`;
@@ -596,36 +353,70 @@
                 reportOutput.classList.add('hidden');
                 reportPlaceholder.classList.remove('hidden');
                 downloadBtn.classList.add('hidden'); 
-
-                // --- ADDED THESE 2 LINES ---
-                placeholderText.classList.remove('hidden'); // Show the original text
-                placeholderLoader.classList.add('hidden');  // Hide the loader
+                bucketContainer.classList.add('hidden');
+                placeholderText.classList.remove('hidden'); 
+                placeholderLoader.classList.add('hidden');  
             }
         }
         
-        // --- Main UI Management Functions ---
+        // --- UPDATED BUCKET LOGIC ---
+        function renderBuckets(data) {
+            criticalList.innerHTML = '';
+            moderateList.innerHTML = '';
+            safeList.innerHTML = '';
+            growingList.innerHTML = '';
+            
+            const selectedGame = gameSelect.value;
+            if (!selectedGame || !data[selectedGame]) return;
+
+            let hasCritical = false;
+            let hasModerate = false;
+            let hasSafe = false;
+            let hasGrowing = false;
+
+            const gameData = data[selectedGame];
+            for (const country of gameData.countryList) {
+                const countryData = gameData.countries[country];
+                const arpdauSeries = countryData.kpis['ARPDAU (Overall)'];
+                if (!arpdauSeries || arpdauSeries.length === 0) continue;
+
+                const lastVal = arpdauSeries[arpdauSeries.length - 1];
+                const l7dAvg = calculateL7DAvg(arpdauSeries);
+                if (l7dAvg === 0) continue; 
+
+                const pctChange = (lastVal - l7dAvg) / l7dAvg;
+                const itemHtml = `<li><strong>${country}</strong>: ${(pctChange * 100).toFixed(1)}%</li>`;
+
+                if (pctChange <= -0.05) {
+                    criticalList.innerHTML += itemHtml;
+                    hasCritical = true;
+                } else if (pctChange > -0.05 && pctChange <= -0.02) {
+                    moderateList.innerHTML += itemHtml;
+                    hasModerate = true;
+                } else if (pctChange > -0.02 && pctChange <= 0) {
+                    safeList.innerHTML += itemHtml;
+                    hasSafe = true;
+                } else {
+                    // Greater than 0
+                    growingList.innerHTML += itemHtml;
+                    hasGrowing = true;
+                }
+            }
+            document.getElementById('critical-empty').classList.toggle('hidden', hasCritical);
+            document.getElementById('moderate-empty').classList.toggle('hidden', hasModerate);
+            document.getElementById('safe-empty').classList.toggle('hidden', hasSafe);
+            document.getElementById('growing-empty').classList.toggle('hidden', hasGrowing);
+        }
 
         function populateGameDropdown() {
             gameSelect.innerHTML = '';
             const gameNames = Object.keys(processedData); 
-            if (gameNames.length === 0) {
-                 gameSelect.innerHTML = '<option>No games found</option>';
-                 return;
-            }
-            gameNames.forEach(game => {
-                const option = document.createElement('option');
-                option.value = game;
-                option.textContent = game;
-                gameSelect.appendChild(option);
-            });
+            if (gameNames.length === 0) { gameSelect.innerHTML = '<option>No games found</option>'; return; }
+            gameNames.forEach(game => { const option = document.createElement('option'); option.value = game; option.textContent = game; gameSelect.appendChild(option); });
         }
 
-        // --- ***** MODIFIED FUNCTION ***** ---
         function handleGameChange() {
-            if (kpiChartInstance) {
-                kpiChartInstance.destroy();
-                kpiChartInstance = null;
-            }
+            if (kpiChartInstance) { kpiChartInstance.destroy(); kpiChartInstance = null; }
             compareToggle.checked = false;
             addComparisonBtn.classList.add('hidden');
             compareControlsContainer.innerHTML = '';
@@ -633,50 +424,28 @@
             populateDependentControls(); 
             handleAdFormatChange(); 
             renderAllTables(); 
-            
-            // --- ADDED THIS LINE ---
-            // If network report is active, refresh it too.
             if (networkDataStore.length > 0) renderNetworkReport();
+            
+            // Trigger bucket update for the selected game
+            renderBuckets(processedData);
         }
         
         function populateDependentControls() {
             const selectedGame = gameSelect.value;
             const gameData = processedData[selectedGame];
-            if (!gameData) {
-                countrySelect.innerHTML = '<option>--</option>';
-                adFormatSelect.innerHTML = '<option>--</option>';
-                kpiSelect.innerHTML = '<option>--</option>';
-                return;
-            }
+            if (!gameData) { countrySelect.innerHTML = '<option>--</option>'; adFormatSelect.innerHTML = '<option>--</option>'; kpiSelect.innerHTML = '<option>--</option>'; return; }
             countrySelect.innerHTML = '';
-            // --- USES GLOBAL priority_countries ---
-            gameData.countryList.forEach(country => {
-                const option = document.createElement('option');
-                option.value = country;
-                option.textContent = country;
-                countrySelect.appendChild(option);
-            });
+            gameData.countryList.forEach(country => { const option = document.createElement('option'); option.value = country; option.textContent = country; countrySelect.appendChild(option); });
             adFormatSelect.innerHTML = '';
-            Object.keys(gameData.kpiLists).forEach(format => {
-                const option = document.createElement('option');
-                option.value = format;
-                option.textContent = format;
-                adFormatSelect.appendChild(option);
-            });
+            Object.keys(gameData.kpiLists).forEach(format => { const option = document.createElement('option'); option.value = format; option.textContent = format; adFormatSelect.appendChild(option); });
         }
 
         function populateKpiDropdown() {
             const selectedGame = gameSelect.value;
             const selectedFormat = adFormatSelect.value;
             const kpis = processedData[selectedGame]?.kpiLists[selectedFormat] || [];
-            
             kpiSelect.innerHTML = '';
-            kpis.forEach(kpi => {
-                const option = document.createElement('option');
-                option.value = kpi;
-                option.textContent = kpi;
-                kpiSelect.appendChild(option);
-            });
+            kpis.forEach(kpi => { const option = document.createElement('option'); option.value = kpi; option.textContent = kpi; kpiSelect.appendChild(option); });
         }
 
          function handleAdFormatChange() {
@@ -688,67 +457,22 @@
             const selectedGame = gameSelect.value;
             const gameData = processedData[selectedGame];
             tableContainer.innerHTML = ''; 
-
-            if (!gameData || !gameData.countryList || gameData.countryList.length === 0) {
-                 tableContainer.innerHTML = '<p class="text-gray-500 italic">No table data found for this game.</p>';
-                 return;
-            }
-            for (const country of gameData.countryList) {
-                if (gameData.tablesHtml[country]) {
-                    tableContainer.innerHTML += gameData.tablesHtml[country];
-                }
-            }
+            if (!gameData || !gameData.countryList || gameData.countryList.length === 0) { tableContainer.innerHTML = '<p class="text-gray-500 italic">No table data found for this game.</p>'; return; }
+            for (const country of gameData.countryList) { if (gameData.tablesHtml[country]) { tableContainer.innerHTML += gameData.tablesHtml[country]; } }
         }
 
-        // --- Compare and Graphing Logic ---
-
         function handleCompareToggleChange() {
-            if (compareToggle.checked) {
-                addComparisonBtn.classList.remove('hidden');
-                addComparisonRow();
-            } else {
-                addComparisonBtn.classList.add('hidden');
-                compareControlsContainer.innerHTML = '';
-                comparisonRowCounter = 0;
-                clearAllCompareLines();
-            }
+            if (compareToggle.checked) { addComparisonBtn.classList.remove('hidden'); addComparisonRow(); } 
+            else { addComparisonBtn.classList.add('hidden'); compareControlsContainer.innerHTML = ''; comparisonRowCounter = 0; clearAllCompareLines(); }
         }
 
         function addComparisonRow() {
             comparisonRowCounter++;
             const rowId = `compare-row-${comparisonRowCounter}`;
-            
             const newRow = document.createElement('div');
             newRow.id = rowId;
             newRow.className = "compare-row-item p-4 bg-gray-50 rounded-lg border border-gray-200";
-            
-            newRow.innerHTML = `
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-lg font-semibold text-gray-700">Comparison ${comparisonRowCounter}</h3>
-                    <button class="remove-row-btn" data-row-id="${rowId}" title="Remove this comparison">&times;</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare Game</label>
-                        <select class="compare-game-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare Country</label>
-                        <select class="compare-country-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare Ad Format</label>
-                        <select class="compare-ad-format-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Compare KPI</label>
-                        <select class="compare-kpi-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select>
-                    </div>
-                    <button class="add-to-graph-btn col-span-2 md:col-span-1 py-2 px-6 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-all active:scale-95" data-row-id="${rowId}">Add to Graph</button>
-                    <input type="hidden" class="graph-dataset-label" value="">
-                </div>
-            `;
-            
+            newRow.innerHTML = `<div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-gray-700">Comparison ${comparisonRowCounter}</h3><button class="remove-row-btn" data-row-id="${rowId}" title="Remove this comparison">&times;</button></div><div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end"><div><label class="block text-sm font-medium text-gray-700 mb-1">Compare Game</label><select class="compare-game-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Compare Country</label><select class="compare-country-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Compare Ad Format</label><select class="compare-ad-format-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Compare KPI</label><select class="compare-kpi-select block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></select></div><button class="add-to-graph-btn col-span-2 md:col-span-1 py-2 px-6 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-all active:scale-95" data-row-id="${rowId}">Add to Graph</button><input type="hidden" class="graph-dataset-label" value=""></div>`;
             compareControlsContainer.appendChild(newRow);
             populateCompareGameDropdown(newRow.querySelector('.compare-game-select'));
         }
@@ -763,34 +487,15 @@
             const row = gameSelectElement.closest('.compare-row-item');
             const countrySelectEl = row.querySelector('.compare-country-select');
             const adFormatSelectEl = row.querySelector('.compare-ad-format-select');
-            
             const selectedGame = gameSelectElement.value;
             const gameData = processedData[selectedGame];
-
-            if (!gameData) {
-                countrySelectEl.innerHTML = '<option>--</option>';
-                adFormatSelectEl.innerHTML = '<option>--</option>';
-                return;
-            }
-
+            if (!gameData) { countrySelectEl.innerHTML = '<option>--</option>'; adFormatSelectEl.innerHTML = '<option>--</option>'; return; }
             countrySelectEl.innerHTML = '';
-            gameData.countryList.forEach(country => {
-                const option = document.createElement('option');
-                option.value = country;
-                option.textContent = country;
-                countrySelectEl.appendChild(option);
-            });
+            gameData.countryList.forEach(country => { const option = document.createElement('option'); option.value = country; option.textContent = country; countrySelectEl.appendChild(option); });
             countrySelectEl.value = gameData.countryList.includes(countrySelect.value) ? countrySelect.value : gameData.countryList[0];
-            
             adFormatSelectEl.innerHTML = '';
-            Object.keys(gameData.kpiLists).forEach(format => {
-                const option = document.createElement('option');
-                option.value = format;
-                option.textContent = format;
-                adFormatSelectEl.appendChild(option);
-            });
+            Object.keys(gameData.kpiLists).forEach(format => { const option = document.createElement('option'); option.value = format; option.textContent = format; adFormatSelectEl.appendChild(option); });
             adFormatSelectEl.value = adFormatSelect.value;
-            
             handleCompareAdFormatChange(adFormatSelectEl);
         }
 
@@ -798,43 +503,26 @@
             const row = adFormatSelectElement.closest('.compare-row-item');
             const kpiSelectEl = row.querySelector('.compare-kpi-select');
             const gameSelectEl = row.querySelector('.compare-game-select');
-
             const selectedGame = gameSelectEl.value;
             const selectedFormat = adFormatSelectElement.value; 
             const kpis = processedData[selectedGame]?.kpiLists[selectedFormat] || [];
-            
             kpiSelectEl.innerHTML = '';
-            kpis.forEach(kpi => {
-                const option = document.createElement('option');
-                option.value = kpi;
-                option.textContent = kpi;
-                kpiSelectEl.appendChild(option);
-            });
+            kpis.forEach(kpi => { const option = document.createElement('option'); option.value = kpi; option.textContent = kpi; kpiSelectEl.appendChild(option); });
             kpiSelectEl.value = kpis.includes(kpiSelect.value) ? kpiSelect.value : kpis[0];
         }
 
         function handleRemoveRow(buttonEl) {
             const rowId = buttonEl.dataset.rowId;
             const row = document.getElementById(rowId);
-            
             const storedLabel = row.querySelector('.graph-dataset-label').value;
-            if (storedLabel) {
-                removeDatasetFromGraph(storedLabel, true); 
-            }
-            
+            if (storedLabel) removeDatasetFromGraph(storedLabel, true); 
             row.remove();
         }
         
         function clearAllCompareLines() {
-            if (!kpiChartInstance || kpiChartInstance.data.datasets.length <= 1) {
-                return;
-            }
+            if (!kpiChartInstance || kpiChartInstance.data.datasets.length <= 1) return;
             kpiChartInstance.data.datasets = [kpiChartInstance.data.datasets[0]];
-            
-            if (kpiChartInstance.options.scales.y1) {
-                delete kpiChartInstance.options.scales.y1;
-            }
-
+            if (kpiChartInstance.options.scales.y1) delete kpiChartInstance.options.scales.y1;
             kpiChartInstance.update();
         }
 
@@ -842,321 +530,127 @@
             const selectedGame = gameSelect.value;
             const selectedCountry = countrySelect.value;
             const selectedKpi = kpiSelect.value;
-
-            if (!selectedGame || !selectedCountry || !selectedKpi || !processedData[selectedGame]) {
-                if (kpiChartInstance) {
-                    kpiChartInstance.destroy();
-                    kpiChartInstance = null;
-                }
-                return; 
-            }
+            if (!selectedGame || !selectedCountry || !selectedKpi || !processedData[selectedGame]) { if (kpiChartInstance) { kpiChartInstance.destroy(); kpiChartInstance = null; } return; }
             const countryData = processedData[selectedGame].countries[selectedCountry];
-            if (!countryData) { return; }
-
+            if (!countryData) return;
             const labels = countryData.dates;
             const data = countryData.kpis[selectedKpi];
             if (!data) return;
-
             const datasetLabel = `${selectedGame} - ${selectedCountry} - ${selectedKpi} (Base)`;
             const newBaseDataset = createDataset(datasetLabel, data, selectedKpi, 0, 'y'); 
-
-            if (!kpiChartInstance) {
-                createChart(labels, newBaseDataset);
-            } else {
-                kpiChartInstance.data.datasets = [newBaseDataset]; 
-                kpiChartInstance.data.labels = labels;
-                
-                if (kpiChartInstance.options.scales.y1) {
-                    delete kpiChartInstance.options.scales.y1;
-                }
-                
-                kpiChartInstance.update();
-            }
+            if (!kpiChartInstance) { createChart(labels, newBaseDataset); } 
+            else { kpiChartInstance.data.datasets = [newBaseDataset]; kpiChartInstance.data.labels = labels; if (kpiChartInstance.options.scales.y1) delete kpiChartInstance.options.scales.y1; kpiChartInstance.update(); }
         }
 
         function handleAddDataFromRow(buttonEl) {
             if (!kpiChartInstance) return; 
-
             const row = buttonEl.closest('.compare-row-item');
             const rowId = row.id;
             const gameSelectEl = row.querySelector('.compare-game-select');
             const countrySelectEl = row.querySelector('.compare-country-select');
             const kpiSelectEl = row.querySelector('.compare-kpi-select');
             const labelStorage = row.querySelector('.graph-dataset-label');
-            
             const selectedGame = gameSelectEl.value;
             const selectedCountry = countrySelectEl.value;
             const selectedKpi = kpiSelectEl.value;
-            
             const countryData = processedData[selectedGame].countries[selectedCountry];
-            if (!countryData) { 
-                statusEl.className = 'text-red-600';
-                statusEl.textContent = 'Error: No data for selected compare game/country.';
-                return; 
-            }
-
+            if (!countryData) { statusEl.className = 'text-red-600'; statusEl.textContent = 'Error: No data for selected compare game/country.'; return; }
             const data = countryData.kpis[selectedKpi];
-            if (!data) { 
-                statusEl.className = 'text-red-600';
-                statusEl.textContent = 'Error: No data for selected compare KPI.';
-                return; 
-            }
-
+            if (!data) { statusEl.className = 'text-red-600'; statusEl.textContent = 'Error: No data for selected compare KPI.'; return; }
             const datasetLabel = `${rowId} | ${selectedGame} - ${selectedCountry} - ${selectedKpi}`;
             const baseKpi = kpiSelect.value;
             const yAxisID = (selectedKpi === baseKpi) ? 'y' : 'y1';
-
             const oldLabel = labelStorage.value;
-            if (oldLabel) {
-                removeDatasetFromGraph(oldLabel, false); 
-            }
-            
-            if (yAxisID === 'y1' && !kpiChartInstance.options.scales.y1) {
-                kpiChartInstance.options.scales.y1 = {
-                    type: 'linear',
-                    position: 'right',
-                    ticks: { color: '#E74C3C' },
-                    grid: { drawOnChartArea: false }
-                };
-            }
-            
+            if (oldLabel) removeDatasetFromGraph(oldLabel, false); 
+            if (yAxisID === 'y1' && !kpiChartInstance.options.scales.y1) { kpiChartInstance.options.scales.y1 = { type: 'linear', position: 'right', ticks: { color: '#E74C3C' }, grid: { drawOnChartArea: false } }; }
             const colorIndex = (kpiChartInstance.data.datasets.length % (lineColors.length - 1)) + 1; 
             const newDataset = createDataset(datasetLabel, data, selectedKpi, colorIndex, yAxisID);
-
             kpiChartInstance.data.datasets.push(newDataset);
             kpiChartInstance.update();
-            
             labelStorage.value = datasetLabel;
-            
             statusEl.className = 'text-green-600';
             statusEl.textContent = 'Added to graph!';
         }
 
         function removeDatasetFromGraph(datasetLabel, update = true) {
             if (!kpiChartInstance) return;
-
             kpiChartInstance.data.datasets = kpiChartInstance.data.datasets.filter(d => d.label !== datasetLabel);
-            
             const y1Datasets = kpiChartInstance.data.datasets.filter(d => d.yAxisID === 'y1').length;
-            
-            if (y1Datasets === 0 && kpiChartInstance.options.scales.y1) {
-                delete kpiChartInstance.options.scales.y1;
-            }
-
-            if (update) {
-                kpiChartInstance.update();
-            }
+            if (y1Datasets === 0 && kpiChartInstance.options.scales.y1) delete kpiChartInstance.options.scales.y1;
+            if (update) kpiChartInstance.update();
         }
 
         function createChart(labels, baseDataset) {
-            if (kpiChartInstance) {
-                kpiChartInstance.destroy();
-            }
+            if (kpiChartInstance) kpiChartInstance.destroy();
             const ctx = kpiChartCanvas.getContext('2d');
-            kpiChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [baseDataset]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // <-- THIS IS THE FIX
-                    scales: {
-                        y: { 
-                            type: 'linear',
-                            position: 'left',
-                            ticks: { color: '#6b7280' }, 
-                        }
-                    }
-                }
-            });
+            kpiChartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [baseDataset] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { type: 'linear', position: 'left', ticks: { color: '#6b7280' } } } } });
         }
 
         function createDataset(label, data, kpiName, colorIndex, yAxisID = 'y') {
             let borderColor = lineColors[colorIndex % lineColors.length];
-            
-            if (colorIndex === 0) { 
-                if (kpiName.includes('(Int)')) {
-                    borderColor = '#FFA500';
-                } else if (kpiName.includes('(Rew)')) {
-                    borderColor = '#3498DB';
-                }
-            }
-            
-            return {
-                label: label,
-                data: data,
-                fill: false,
-                borderColor: borderColor,
-                tension: 0.1,
-                yAxisID: yAxisID 
-            };
+            if (colorIndex === 0) { if (kpiName.includes('(Int)')) borderColor = '#FFA500'; else if (kpiName.includes('(Rew)')) borderColor = '#3498DB'; }
+            return { label: label, data: data, fill: false, borderColor: borderColor, tension: 0.1, yAxisID: yAxisID };
         }
 
-        // --- Data Processing Functions ---
-        
         function parseCsv(file) {
-            return new Promise((resolve, reject) => {
-                Papa.parse(file, {
-                    header: true,
-                    skipEmptyLines: true,
-                    // dynamicTyping: true, // <-- REMOVED
-                    complete: (results) => resolve(results),
-                    error: (err) => reject(err)
-                });
-            });
+            return new Promise((resolve, reject) => { Papa.parse(file, { header: true, skipEmptyLines: true, complete: (results) => resolve(results), error: (err) => reject(err) }); });
         }
 
         function processAndStoreData(intData, rewData) {
-            
-            const allGames = [...new Set([
-                ...intData.map(r => r['App Name']), 
-                ...rewData.map(r => r['App Name'])
-            ])].filter(Boolean);
-            
-            // --- USES GLOBAL CONSTANT ---
-            
-            const metric_mapping_int = {
-                'Revenue': 'Revenue (Int)',
-                'Avg revenue / active users': 'ARPDAU (Int)',
-                'eCPM': 'ECPM (Int)',
-                'Impressions / sessions': 'Imps / Session (Int)',
-                'Impressions / active users': 'Imps / DAU (Int)',
-                'App fills rate': 'Fill Rate (Int)'
-            };
-            const metric_mapping_rew = {
-                'Revenue': 'Revenue (Rew)',
-                'Avg revenue / active users': 'ARPDAU (Rew)',
-                'eCPM': 'ECPM (Rew)',
-                'Impressions / sessions': 'Imps / Session (Rew)',
-                'Impressions / active users': 'Imps / DAU (Rew)',
-                'App fills rate': 'Fill Rate (Rew)'
-            };
-            
+            const allGames = [...new Set([...intData.map(r => r['App Name']), ...rewData.map(r => r['App Name'])])].filter(Boolean);
+            const metric_mapping_int = { 'Revenue': 'Revenue (Int)', 'Avg revenue / active users': 'ARPDAU (Int)', 'eCPM': 'ECPM (Int)', 'Impressions / sessions': 'Imps / Session (Int)', 'Impressions / active users': 'Imps / DAU (Int)', 'App fills rate': 'Fill Rate (Int)' };
+            const metric_mapping_rew = { 'Revenue': 'Revenue (Rew)', 'Avg revenue / active users': 'ARPDAU (Rew)', 'eCPM': 'ECPM (Rew)', 'Impressions / sessions': 'Imps / Session (Rew)', 'Impressions / active users': 'Imps / DAU (Rew)', 'App fills rate': 'Fill Rate (Rew)' };
             let output = {};
-
             for (const game of allGames) {
-                let gameOutput = {
-                    countries: {}, 
-                    tablesHtml: {}, 
-                    countryList: [], 
-                    kpiLists: {
-                        "Overall": ['DAU', 'Revenue (Overall)', 'ARPDAU (Overall)'],
-                        "Int": Object.values(metric_mapping_int),
-                        "Rew": Object.values(metric_mapping_rew)
-                    }
-                };
-                
-                // --- USES GLOBAL CONSTANT ---
+                let gameOutput = { countries: {}, tablesHtml: {}, countryList: [], kpiLists: { "Overall": ['DAU', 'Revenue (Overall)', 'ARPDAU (Overall)'], "Int": Object.values(metric_mapping_int), "Rew": Object.values(metric_mapping_rew) } };
                 for (const country of priority_countries) {
-                    
-                    const df_int_c = intData
-                        .filter(r => r.Country === country && r['App Name'] === game)
-                        .map(r => ({ ...r, Date: new Date(r.Date) }));
-                    
-                    const df_rew_c = rewData
-                        .filter(r => r.Country === country && r['App Name'] === game)
-                        .map(r => ({ ...r, Date: new Date(r.Date) }));
-
-                    if (df_int_c.length === 0 && df_rew_c.length === 0) {
-                        continue; 
-                    }
-
-                    const allDateTimes = new Set([
-                        ...df_int_c.map(r => r.Date.getTime()),
-                        ...df_rew_c.map(r => r.Date.getTime())
-                    ]);
-                    const dates_dt = Array.from(allDateTimes)
-                        .map(t => new Date(t))
-                        .sort((a, b) => a - b);
-                    
+                    const df_int_c = intData.filter(r => r.Country === country && r['App Name'] === game).map(r => ({ ...r, Date: new Date(r.Date) }));
+                    const df_rew_c = rewData.filter(r => r.Country === country && r['App Name'] === game).map(r => ({ ...r, Date: new Date(r.Date) }));
+                    if (df_int_c.length === 0 && df_rew_c.length === 0) continue; 
+                    const allDateTimes = new Set([...df_int_c.map(r => r.Date.getTime()), ...df_rew_c.map(r => r.Date.getTime())]);
+                    const dates_dt = Array.from(allDateTimes).map(t => new Date(t)).sort((a, b) => a - b);
                     const dau_source = df_int_c.length > 0 ? df_int_c : df_rew_c;
                     const dau_series = createSeries(dau_source, dates_dt, 'Active users'); 
-                    
                     if (dau_series.length === 0) continue; 
-
                     const avg_dau = dau_series.reduce((a, b) => a + b, 0) / dau_series.length;
-
-                    if (avg_dau <= 100) {
-                        continue;
-                    }
-                    
+                    if (avg_dau <= 200) continue;
                     gameOutput.countryList.push(country); 
-
                     const dates_str = dates_dt.map(d => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
                     const dates_with_avg = [...dates_str, 'L7D Avg'];
-                    
                     let kpiData = {};
                     let int_metrics = {};
                     let rew_metrics = {};
-
-                    for (const [orig_col, label] of Object.entries(metric_mapping_int)) {
-                        int_metrics[label] = createSeries(df_int_c, dates_dt, orig_col);
-                    }
-                    for (const [orig_col, label] of Object.entries(metric_mapping_rew)) {
-                        rew_metrics[label] = createSeries(df_rew_c, dates_dt, orig_col);
-                    }
-
+                    for (const [orig_col, label] of Object.entries(metric_mapping_int)) int_metrics[label] = createSeries(df_int_c, dates_dt, orig_col);
+                    for (const [orig_col, label] of Object.entries(metric_mapping_rew)) rew_metrics[label] = createSeries(df_rew_c, dates_dt, orig_col);
                     const revenue_overall = addSeries(int_metrics['Revenue (Int)'], rew_metrics['Revenue (Rew)']);
                     const arpadu_overall = addSeries(int_metrics['ARPDAU (Int)'], rew_metrics['ARPDAU (Rew)']);
-                    
                     kpiData['DAU'] = dau_series;
                     kpiData['Revenue (Overall)'] = revenue_overall;
                     kpiData['ARPDAU (Overall)'] = arpadu_overall;
-                    Object.assign(kpiData, int_metrics);
-Object.assign(kpiData, rew_metrics);
-                    
-                    gameOutput.countries[country] = {
-                        dates: dates_str,
-                        kpis: kpiData
-                    };
-
-                    // --- Generate HTML table ---
-                    let tableHtml = '<table class="report-table">';
-                    tableHtml += '<thead class="country-header">';
+                    Object.assign(kpiData, int_metrics); Object.assign(kpiData, rew_metrics);
+                    gameOutput.countries[country] = { dates: dates_str, kpis: kpiData };
+                    let tableHtml = '<table class="report-table"><thead class="country-header">';
                     tableHtml += `<tr><th>${country}</th>`;
-                    dates_with_avg.forEach(dateStr => {
-                        tableHtml += `<th>${dateStr}</th>`;
-                    });
-                    tableHtml += '</tr></thead>';
-                    tableHtml += '<tbody>';
+                    dates_with_avg.forEach(dateStr => { tableHtml += `<th>${dateStr}</th>`; });
+                    tableHtml += '</tr></thead><tbody>';
                     tableHtml += createRowHtml('DAU', dau_series);
                     tableHtml += createRowHtml('Revenue (Overall)', revenue_overall);
                     tableHtml += createRowHtml('ARPDAU (Overall)', arpadu_overall, '', ['ARPDAU (Overall)']);
                     tableHtml += `<tr class="spacer-row"><td colspan="${dates_with_avg.length + 1}"></td></tr>`;
-                    for (const label of gameOutput.kpiLists.Int) {
-                        tableHtml += createRowHtml(label, int_metrics[label], 'int-metric-header', ['ARPDAU (Int)', 'ECPM (Int)', 'Imps / Session (Int)']);
-                    }
+                    for (const label of gameOutput.kpiLists.Int) tableHtml += createRowHtml(label, int_metrics[label], 'int-metric-header', ['ARPDAU (Int)', 'ECPM (Int)', 'Imps / Session (Int)']);
                     tableHtml += `<tr class="spacer-row"><td colspan="${dates_with_avg.length + 1}"></td></tr>`;
-                    for (const label of gameOutput.kpiLists.Rew) {
-                        tableHtml += createRowHtml(label, rew_metrics[label], 'rew-metric-header', ['ARPDAU (Rew)', 'ECPM (Rew)', 'Imps / Session (Rew)']);
-                    }
+                    for (const label of gameOutput.kpiLists.Rew) tableHtml += createRowHtml(label, rew_metrics[label], 'rew-metric-header', ['ARPDAU (Rew)', 'ECPM (Rew)', 'Imps / Session (Rew)']);
                     tableHtml += '</tbody></table>';
-                    
                     gameOutput.tablesHtml[country] = tableHtml;
-
-                } // End country loop
-
-                if (gameOutput.countryList.length > 0) {
-                    output[game] = gameOutput;
-                }
-
-            } // End game loop
-
+                } 
+                if (gameOutput.countryList.length > 0) output[game] = gameOutput;
+            } 
             return output; 
         }
 
-        // --- Helper Functions ---
-
         function createSeries(data, dates_dt, metricCol) {
-            if (!data || data.length === 0) {
-                return new Array(dates_dt.length).fill(0);
-            }
-            const map = new Map(data.map(row => {
-                const value = typeof row[metricCol] === 'number' ? row[metricCol] : parseFloat(row[metricCol]);
-                return [row.Date.getTime(), isNaN(value) ? 0 : value];
-            }));
+            if (!data || data.length === 0) return new Array(dates_dt.length).fill(0);
+            const map = new Map(data.map(row => { const value = typeof row[metricCol] === 'number' ? row[metricCol] : parseFloat(row[metricCol]); return [row.Date.getTime(), isNaN(value) ? 0 : value]; }));
             return dates_dt.map(date => map.get(date.getTime()) || 0);
         }
 
@@ -1178,192 +672,96 @@ Object.assign(kpiData, rew_metrics);
             let rowHtml = `<tr><td class="${labelClass}">${label}</td>`;
             const lastVal = data[data.length - 1] || 0;
             const l7dAvg = calculateL7DAvg(data);
-            
             const compLastVal = parseFloat(lastVal.toFixed(2));
             const compL7dAvg = parseFloat(l7dAvg.toFixed(2));
-
             let lastCellClass = 'neutral-change'; 
-            if (metricsToColor.includes(label)) {
-                if (compLastVal > compL7dAvg) {
-                    lastCellClass = 'positive-change';
-                } else if (compLastVal < compL7dAvg) {
-                    lastCellClass = 'negative-change'; 
-                }
-            }
-
+            if (metricsToColor.includes(label)) { if (compLastVal > compL7dAvg) lastCellClass = 'positive-change'; else if (compLastVal < compL7dAvg) lastCellClass = 'negative-change'; }
             data.forEach((val, index) => {
                 const numVal = Number(val);
                 const displayVal = (numVal % 1 !== 0 && numVal.toFixed(2) !== '0.00') ? numVal.toFixed(2) : Math.round(numVal);
-                
-                if (index === data.length - 1) {
-                    rowHtml += `<td class="${lastCellClass}">${displayVal}</td>`;
-                } else {
-                    rowHtml += `<td>${displayVal}</td>`;
-                }
+                if (index === data.length - 1) rowHtml += `<td class="${lastCellClass}">${displayVal}</td>`;
+                else rowHtml += `<td>${displayVal}</td>`;
             });
-
             const displayAvg = (l7dAvg % 1 !== 0 && l7dAvg.toFixed(2) !== '0.00') ? l7dAvg.toFixed(2) : Math.round(l7dAvg);
-            rowHtml += `<td>${displayAvg}</td>`;
-            rowHtml += '</tr>';
+            rowHtml += `<td>${displayAvg}</td></tr>`;
             return rowHtml;
         }
-// --- Excel Download Functions (Unchanged) ---
 
         function handleDownloadExcel() {
             try {
                 statusEl.className = 'text-blue-600';
                 statusEl.textContent = 'Generating Excel... This may take a moment.';
-
                 const wb = XLSX.utils.book_new(); 
-
-                // --- Define reusable styles ---
                 const thinBorder = { style: "thin", color: { rgb: "000000" } };
                 const thickBorder = { style: "thick", color: { rgb: "000000" } };
                 const centerAlign = { alignment: { horizontal: "center", vertical: "center" } };
                 const leftAlign = { alignment: { horizontal: "left", vertical: "center" } };
-                
-                // Style for the main Country header cell (e.g., "India")
-                const headerCountryStyle = { 
-                    font: { bold: true, sz: 14 }, // Larger font
-                    alignment: leftAlign,
-                    border: { top: thickBorder, left: thickBorder, bottom: thinBorder, right: thinBorder }
-                };
-                // Style for the date header cells (e.g., "24 Oct")
-                const headerDateStyle = { 
-                    font: { bold: true }, 
-                    alignment: centerAlign,
-                    border: { top: thickBorder, bottom: thinBorder, left: thinBorder, right: thinBorder }
-                };
-                // Style for the L7D Avg header cell
-                const headerL7DStyle = { 
-                    font: { bold: true }, 
-                    alignment: centerAlign,
-                    border: { top: thickBorder, bottom: thinBorder, right: thickBorder, left: thinBorder }
-                };
-
+                const headerCountryStyle = { font: { bold: true, sz: 14 }, alignment: leftAlign, border: { top: thickBorder, left: thickBorder, bottom: thinBorder, right: thinBorder } };
+                const headerDateStyle = { font: { bold: true }, alignment: centerAlign, border: { top: thickBorder, bottom: thinBorder, left: thinBorder, right: thinBorder } };
+                const headerL7DStyle = { font: { bold: true }, alignment: centerAlign, border: { top: thickBorder, bottom: thinBorder, right: thickBorder, left: thinBorder } };
 
                 for (const gameName of Object.keys(processedData)) {
                     const gameData = processedData[gameName];
-                    let ws = {}; // **Create an EMPTY worksheet object**
-                    let currentRow = 0; // Track the current row index
-                    let numCols = 0; // Will be set by the first header
-
+                    let ws = {}; 
+                    let currentRow = 0; 
+                    let numCols = 0; 
                     for (const country of gameData.countryList) {
                         const countryData = gameData.countries[country];
                         if (!countryData) continue;
-
                         const dates = countryData.dates;
                         const header1 = [country, ...dates, 'L7D Avg'];
-                        numCols = header1.length; // Set the number of columns
-                        
-                        let countryRows = []; // Store cell objects for *this* country block
-
-                        // --- 1. Create all rows for this country ---
-                        
-                        // --- Create Header Row ---
+                        numCols = header1.length; 
+                        let countryRows = []; 
                         const styledHeader1 = header1.map((h, i) => {
                             let cell = { v: h, s: {} };
-                            if (i === 0) {
-                                cell.s = headerCountryStyle; // Country style
-                            } else if (i === numCols - 1) {
-                                cell.s = headerL7DStyle; // L7D Avg style
-                            } else {
-                                cell.s = headerDateStyle; // Date style
-                            }
+                            if (i === 0) cell.s = headerCountryStyle; 
+                            else if (i === numCols - 1) cell.s = headerL7DStyle; 
+                            else cell.s = headerDateStyle; 
                             return cell;
                         });
                         countryRows.push(styledHeader1);
-
-                        // --- Create Data Rows ---
                         const overallMetrics = gameData.kpiLists.Overall;
                         const intMetrics = gameData.kpiLists.Int;
                         const rewMetrics = gameData.kpiLists.Rew;
-                        const metricsToColor = [ 
-                            'ARPDAU (Overall)', 'ARPDAU (Int)', 'ECPM (Int)', 
-                            'Imps / Session (Int)', 'ARPDAU (Rew)', 'ECPM (Rew)', 'Imps / Session (Rew)'
-                        ];
-
-                        for (const metric of overallMetrics) {
-                            countryRows.push(createExcelRow(metric, countryData.kpis[metric], '', metricsToColor, numCols));
-                        }
-                        countryRows.push([]); // Spacer
-
-                        for (const metric of intMetrics) {
-                            countryRows.push(createExcelRow(metric, countryData.kpis[metric], 'int-metric-header', metricsToColor, numCols));
-                        }
-                        countryRows.push([]); // Spacer
-
-                        for (const metric of rewMetrics) {
-                            countryRows.push(createExcelRow(metric, countryData.kpis[metric], 'rew-metric-header', metricsToColor, numCols));
-                        }
+                        const metricsToColor = ['ARPDAU (Overall)', 'ARPDAU (Int)', 'ECPM (Int)', 'Imps / Session (Int)', 'ARPDAU (Rew)', 'ECPM (Rew)', 'Imps / Session (Rew)'];
+                        for (const metric of overallMetrics) countryRows.push(createExcelRow(metric, countryData.kpis[metric], '', metricsToColor, numCols));
+                        countryRows.push([]); 
+                        for (const metric of intMetrics) countryRows.push(createExcelRow(metric, countryData.kpis[metric], 'int-metric-header', metricsToColor, numCols));
+                        countryRows.push([]); 
+                        for (const metric of rewMetrics) countryRows.push(createExcelRow(metric, countryData.kpis[metric], 'rew-metric-header', metricsToColor, numCols));
                         
-                        // --- 2. Apply borders and add all cells to worksheet ---
                         countryRows.forEach((row, rIdx) => {
                             const isSpacer = row.length === 0;
-                            if (isSpacer) {
-                                currentRow++;
-                                return;
-                            }
-                            
+                            if (isSpacer) { currentRow++; return; }
                             const isLastDataRow = (rIdx === countryRows.length - 1);
-
                             for (let cIdx = 0; cIdx < numCols; cIdx++) {
                                 const cell = row[cIdx] || { v: "" }; 
-                                
-                                cell.s = cell.s || {}; // Ensure style object exists
-                                cell.s.border = cell.s.border || {}; // Ensure border object exists
-                                
+                                cell.s = cell.s || {}; cell.s.border = cell.s.border || {}; 
                                 const isFirstCol = cIdx === 0;
                                 const isLastCol = cIdx === numCols - 1;
-
-                                // Apply outer borders
                                 if (isLastDataRow) cell.s.border.bottom = thickBorder;
                                 if (isFirstCol) cell.s.border.left = thickBorder;
                                 if (isLastCol) cell.s.border.right = thickBorder;
-
-                                // Apply thin inner borders
-                                if (rIdx > 0 && !isLastDataRow) { // Not header, not last row
-                                    cell.s.border.bottom = thinBorder;
-                                }
-                                if (cIdx > 0 && !isLastCol) { // Not first col, not last col
-                                    cell.s.border.right = thinBorder;
-                                }
-                                
-                                // Add cell to worksheet at the correct address
+                                if (rIdx > 0 && !isLastDataRow) cell.s.border.bottom = thinBorder;
+                                if (cIdx > 0 && !isLastCol) cell.s.border.right = thinBorder;
                                 const address = XLSX.utils.encode_cell({ r: currentRow, c: cIdx });
                                 ws[address] = cell;
                             }
                             currentRow++;
                         });
-                        
-                        currentRow++; // Add spacer *after* the block
+                        currentRow++; 
                     }
-
-                    // --- 3. Set worksheet column widths ---
                     const fixedColWidths = [];
-                    if (numCols > 0) { // Check if numCols was set
-                        // First column
-                        fixedColWidths.push({ wch: 17.5 });
-                        // All other columns
-                        for(let i = 1; i < numCols; i++) {
-                            fixedColWidths.push({ wch: 11.58 });
-                        }
-                    }
+                    if (numCols > 0) { fixedColWidths.push({ wch: 17.5 }); for(let i = 1; i < numCols; i++) fixedColWidths.push({ wch: 11.58 }); }
                     ws['!cols'] = fixedColWidths;
-
-                    // --- 4. Set worksheet range ---
                     const range = { s: { r: 0, c: 0 }, e: { r: Math.max(0, currentRow - 2), c: Math.max(0, numCols - 1) } };
                     ws['!ref'] = XLSX.utils.encode_range(range);
-
                     const sheetName = gameName.replace(/[:\\/?*[\]]/g, '').substring(0, 31);
                     XLSX.utils.book_append_sheet(wb, ws, sheetName);
                 }
-
                 XLSX.writeFile(wb, "IronSource_Report_Formatted.xlsx");
-                
                 statusEl.className = 'text-green-600';
                 statusEl.textContent = 'Excel downloaded successfully!';
-
             } catch (error) {
                 statusEl.className = 'text-red-600';
                 statusEl.textContent = `Error downloading Excel: ${error.message}`;
@@ -1372,83 +770,42 @@ Object.assign(kpiData, rew_metrics);
         }      
 
         function createExcelRow(label, data, labelClass, metricsToColor, numCols) {
-            // --- Define Styles ---
             const centerAlign = { alignment: { horizontal: "center", vertical: "center" } };
             const greenText = { font: { color: { rgb: "008000" }, bold: true }, alignment: centerAlign };
             const redText = { font: { color: { rgb: "FF0000" }, bold: true }, alignment: centerAlign };
-            const blackText = { font: { color: { rgb: "000000" } }, alignment: centerAlign }; // Normal black
-            
-            // Label styles
+            const blackText = { font: { color: { rgb: "000000" } }, alignment: centerAlign }; 
             const intHeader = { font: { bold: true, color: { rgb: "FFA500" } }, alignment: { horizontal: "left", vertical: "center" } };
             const rewHeader = { font: { bold: true, color: { rgb: "3498DB" } }, alignment: { horizontal: "left", vertical: "center" } };
             const defaultLabel = { font: { bold: true }, alignment: { horizontal: "left", vertical: "center" } };
             
             let labelCell;
-            // 1. Label cell (Left-aligned)
-            if (labelClass === 'int-metric-header') {
-                labelCell = { v: label, s: intHeader };
-            } else if (labelClass === 'rew-metric-header') {
-                labelCell = { v: label, s: rewHeader };
-            } else {
-                labelCell = { v: label, s: defaultLabel };
-            }
+            if (labelClass === 'int-metric-header') labelCell = { v: label, s: intHeader };
+            else if (labelClass === 'rew-metric-header') labelCell = { v: label, s: rewHeader };
+            else labelCell = { v: label, s: defaultLabel };
             const row = [labelCell]; 
 
-            // 2. Color logic
             const lastVal = data[data.length - 1] || 0;
             const l7dAvg = calculateL7DAvg(data);
             const compLastVal = parseFloat(lastVal.toFixed(2));
             const compL7dAvg = parseFloat(l7dAvg.toFixed(2));
 
-            let lastCellStyle = blackText; // Default black
-            if (metricsToColor.includes(label)) {
-                if (compLastVal > compL7dAvg) {
-                    lastCellStyle = greenText; 
-                } else if (compLastVal < compL7dAvg) {
-                    lastCellStyle = redText;
-                }
-            }
+            let lastCellStyle = blackText; 
+            if (metricsToColor.includes(label)) { if (compLastVal > compL7dAvg) lastCellStyle = greenText; else if (compLastVal < compL7dAvg) lastCellStyle = redText; }
 
-            // 3. Data cells (Center-aligned)
             data.forEach((val, index) => {
                 const cell = { v: val, t: 'n' }; 
-                
-                if (val % 1 !== 0) {
-                    cell.z = '0.00'; // 2-decimal number format
-                } else if (val > 1000) {
-                    cell.z = '#,##0'; // Comma separated for DAU
-                }
-                else {
-                    cell.z = '0'; // Integer format
-                }
-
-                if (index === data.length - 1) {
-                    cell.s = lastCellStyle; // Apply red/green/black style
-                } else {
-                    cell.s = centerAlign; // Standard center align
-                }
+                if (val % 1 !== 0) cell.z = '0.00'; else if (val > 1000) cell.z = '#,##0'; else cell.z = '0'; 
+                if (index === data.length - 1) cell.s = lastCellStyle; else cell.s = centerAlign; 
                 row.push(cell);
             });
 
-            // 4. Avg cell (Center-aligned)
             const avgCell = { v: l7dAvg, t: 'n', s: { alignment: centerAlign } };
-            if (l7dAvg % 1 !== 0) {
-                avgCell.z = '0.00';
-            } else if (l7dAvg > 1000) {
-                avgCell.z = '#,##0';
-            } else {
-                avgCell.z = '0';
-            }
+            if (l7dAvg % 1 !== 0) avgCell.z = '0.00'; else if (l7dAvg > 1000) avgCell.z = '#,##0'; else avgCell.z = '0'; 
             row.push(avgCell);
             
-            // 5. Pad row with empty cells
-            while (row.length < numCols) {
-                row.push(null); // Use null for empty cells
-            }
-
+            while (row.length < numCols) row.push(null); 
             return row;
         }      
-
     </script>
 </body>
 </html>
