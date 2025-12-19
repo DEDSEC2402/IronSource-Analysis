@@ -617,7 +617,7 @@
                     const dau_series = createSeries(dau_source, dates_dt, 'Active users'); 
                     if (dau_series.length === 0) continue; 
                     const avg_dau = dau_series.reduce((a, b) => a + b, 0) / dau_series.length;
-                    if (avg_dau <= 200) continue;
+                    if (avg_dau <= 100) continue;
                     gameOutput.countryList.push(country); 
                     const dates_str = dates_dt.map(d => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
                     const dates_with_avg = [...dates_str, 'L7D Avg'];
@@ -814,3 +814,4 @@
     </script>
 </body>
 </html>
+
